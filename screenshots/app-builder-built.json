@@ -1,0 +1,38 @@
+{
+  "url": "http://127.0.0.1:8081/",
+  "viewports": {
+    "desktop": {
+      "width": 1280,
+      "height": 800,
+      "status": 200,
+      "title": "한지",
+      "hasCanvas": false,
+      "bodyTextLen": 1270,
+      "bodyTextHash": "74660e1da9b48e430a389221d20b28d42f265d2412a8d20a70fc9bbf5b26fd5c",
+      "bodyTextPrefix": "한지 한지.md 편집 분할 보기 CJK 보정 열기 저장 샘플 인쇄 공유 설정 한지 # CJK에 정직한 마크다운 뷰어",
+      "horizontalOverflow": false,
+      "consoleErrors": [],
+      "pageErrors": [],
+      "screenshot": "/workspace/screenshots/app-builder-built.png"
+    },
+    "mobile": {
+      "width": 390,
+      "height": 844,
+      "status": 200,
+      "title": "한지",
+      "hasCanvas": false,
+      "bodyTextLen": 1246,
+      "bodyTextHash": "9f38992462107aa06b0068176b3d63c6c54d42d14e01abf6e19a597eae3c7c18",
+      "bodyTextPrefix": "한지 편집 보기 공유 더보기 설정 한지 # CJK에 정직한 마크다운 뷰어입니다. CommonMark는 **강조** ",
+      "horizontalOverflow": false,
+      "consoleErrors": [],
+      "pageErrors": [],
+      "screenshot": "/workspace/screenshots/app-builder-built-mobile.png"
+    }
+  },
+  "brandWarnings": [],
+  "authWarnings": [],
+  "verdictFile": "/workspace/screenshots/app-builder-built.json",
+  "divergesFromBaseline": false,
+  "baselineReasons": []
+}

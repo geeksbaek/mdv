@@ -1,0 +1,1 @@
+import{t as e}from"./studio-F_zQM2wH.js";import{N as t,r as n}from"./index-1pGP2aXd.js";var r=t();function i(){let{d:t}=n.useSearch();return(0,r.jsx)(e,{encoded:t})}export{i as component};
