@@ -641,23 +641,30 @@
   background:
     repeating-linear-gradient(
       to right,
-      color-mix(in oklab, var(--md-bg) 70%, black 0%) 0 1px,
-      color-mix(in oklab, var(--md-bg) 86%, white) 1px 2px,
-      color-mix(in oklab, var(--md-bg) 92%, black) 2px 3px
+      color-mix(in oklab, var(--md-bg) 72%, black) 0 1px,
+      color-mix(in oklab, var(--md-bg) 90%, white) 1px 2px,
+      color-mix(in oklab, var(--md-bg) 94%, black) 2px 3px
     );
-  transition: width 0.4s ease, left 0.4s ease, right 0.4s ease;
+  transition:
+    width 0.4s ease,
+    left 0.4s ease,
+    right 0.4s ease;
 }
 
 .md-book-edge-left {
-  border-radius: 4px 0 0 4px;
-  box-shadow: inset -2px 0 3px -2px rgb(0 0 0 / 0.35), -1px 0 2px rgb(0 0 0 / 0.12);
-  clip-path: polygon(0 1.5%, 100% 0, 100% 100%, 0 98.5%);
+  border-radius: 5px 0 0 5px;
+  box-shadow:
+    inset -3px 0 4px -3px rgb(0 0 0 / 0.5),
+    -2px 0 4px rgb(0 0 0 / 0.18);
+  clip-path: polygon(0 2%, 100% 0, 100% 100%, 0 98%);
 }
 
 .md-book-edge-right {
-  border-radius: 0 4px 4px 0;
-  box-shadow: inset 2px 0 3px -2px rgb(0 0 0 / 0.35), 1px 0 2px rgb(0 0 0 / 0.12);
-  clip-path: polygon(0 0, 100% 1.5%, 100% 98.5%, 0 100%);
+  border-radius: 0 5px 5px 0;
+  box-shadow:
+    inset 3px 0 4px -3px rgb(0 0 0 / 0.5),
+    2px 0 4px rgb(0 0 0 / 0.18);
+  clip-path: polygon(0 0, 100% 2%, 100% 98%, 0 100%);
 }
 
 .md-book-clip {
