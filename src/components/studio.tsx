@@ -43,7 +43,7 @@ function useHydratedStores(encoded?: string | null) {
         stripShareFromUrl();
         return;
       }
-      useDocument.setState({ markdown: doc.markdown, fileName: doc.fileName });
+      useDocument.getState().replace({ markdown: doc.markdown, fileName: doc.fileName });
       if (doc.settings) {
         useSettings.setState({ ...doc.settings, viewMode: "preview" });
       } else {

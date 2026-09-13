@@ -81,6 +81,19 @@ export type Messages = {
   syncScrollHint: string;
   toc: string;
   tocHint: string;
+  library: string;
+  libraryDesc: string;
+  libraryCurrent: string;
+  librarySave: string;
+  librarySaveAsNew: string;
+  librarySaved: (name: string) => string;
+  libraryEmpty: string;
+  libraryOpen: string;
+  libraryDelete: string;
+  libraryConfirmDelete: (name: string) => string;
+  libraryUnsaved: string;
+  libraryUnavailable: string;
+  libraryChars: (n: number) => string;
   faceTilt: string;
   faceTiltHint: string;
   faceTiltPrivacy: string;
@@ -196,13 +209,28 @@ const ko: Messages = {
   syncScrollHint: "편집기와 미리보기를 같은 비율로 움직입니다.",
   toc: "목차",
   tocHint: "제목으로 미리보기 위치를 점프합니다.",
+  library: "내 문서",
+  libraryDesc: "이 브라우저 안에만 저장되는 문서 목록입니다. 다른 기기나 서버로 전송되지 않습니다.",
+  libraryCurrent: "현재 문서",
+  librarySave: "브라우저에 저장",
+  librarySaveAsNew: "새 문서로 저장",
+  librarySaved: (name) => `${name} 문서를 저장했습니다`,
+  libraryEmpty: "저장된 문서가 없습니다.",
+  libraryOpen: "열기",
+  libraryDelete: "삭제",
+  libraryConfirmDelete: (name) => `${name} 문서를 삭제할까요? 되돌릴 수 없습니다.`,
+  libraryUnsaved: "저장하지 않은 변경이 있습니다. 그래도 다른 문서를 열까요?",
+  libraryUnavailable: "이 브라우저에서는 저장소를 쓸 수 없습니다.",
+  libraryChars: (n) => `${n.toLocaleString("ko")}자`,
   faceTilt: "얼굴 따라 회전",
-  faceTiltHint: "전면 카메라로 얼굴 기울기를 읽어 글을 눈높이에 맞춥니다. 누워서 읽을 때 유용합니다.",
+  faceTiltHint:
+    "전면 카메라로 얼굴 기울기를 읽어 글을 눈높이에 맞춥니다. 누워서 읽을 때 유용합니다.",
   faceTiltPrivacy: "영상은 기기 안에서만 처리되며 어디에도 전송되지 않습니다.",
   faceTiltMode: "회전 방식",
   faceTiltSnap: "90도 단위",
   faceTiltFree: "자유 회전",
-  faceTiltFreeHint: "자유 회전에서는 pretext로 줄마다 폭을 다시 계산해 기울어진 화면을 끝까지 채웁니다. 이때는 본문이 글자만으로 표시됩니다.",
+  faceTiltFreeHint:
+    "자유 회전에서는 pretext로 줄마다 폭을 다시 계산해 기울어진 화면을 끝까지 채웁니다. 이때는 본문이 글자만으로 표시됩니다.",
   faceTiltInvert: "방향 반전",
   faceTiltInvertHint: "글이 반대로 돌면 켜세요.",
   faceTiltLoading: "카메라를 준비하는 중…",
@@ -318,13 +346,28 @@ const ja: Messages = {
   syncScrollHint: "編集とプレビューを同じ割合で動かします。",
   toc: "目次",
   tocHint: "見出しからプレビュー位置へジャンプします。",
+  library: "マイ文書",
+  libraryDesc: "このブラウザ内にだけ保存される文書一覧です。他の端末やサーバーへは送信されません。",
+  libraryCurrent: "現在の文書",
+  librarySave: "ブラウザに保存",
+  librarySaveAsNew: "新しい文書として保存",
+  librarySaved: (name) => `${name} を保存しました`,
+  libraryEmpty: "保存された文書はありません。",
+  libraryOpen: "開く",
+  libraryDelete: "削除",
+  libraryConfirmDelete: (name) => `${name} を削除しますか？元に戻せません。`,
+  libraryUnsaved: "保存していない変更があります。別の文書を開きますか？",
+  libraryUnavailable: "このブラウザではストレージを使用できません。",
+  libraryChars: (n) => `${n.toLocaleString("ja")}文字`,
   faceTilt: "顔に合わせて回転",
-  faceTiltHint: "前面カメラで顔の傾きを読み取り、文章を目線に合わせます。寝転んで読むときに便利です。",
+  faceTiltHint:
+    "前面カメラで顔の傾きを読み取り、文章を目線に合わせます。寝転んで読むときに便利です。",
   faceTiltPrivacy: "映像は端末内でのみ処理され、どこにも送信されません。",
   faceTiltMode: "回転方式",
   faceTiltSnap: "90度単位",
   faceTiltFree: "自由回転",
-  faceTiltFreeHint: "自由回転では pretext が行ごとに幅を計算し直し、傾いた画面を端まで埋めます。本文は文字のみで表示されます。",
+  faceTiltFreeHint:
+    "自由回転では pretext が行ごとに幅を計算し直し、傾いた画面を端まで埋めます。本文は文字のみで表示されます。",
   faceTiltInvert: "方向を反転",
   faceTiltInvertHint: "逆方向に回る場合はオンにしてください。",
   faceTiltLoading: "カメラを準備中…",
@@ -440,13 +483,27 @@ const zhCN: Messages = {
   syncScrollHint: "编辑区和预览按相同比例滚动。",
   toc: "目录",
   tocHint: "通过标题跳到预览位置。",
+  library: "我的文档",
+  libraryDesc: "仅保存在此浏览器中的文档列表，不会发送到其他设备或服务器。",
+  libraryCurrent: "当前文档",
+  librarySave: "保存到浏览器",
+  librarySaveAsNew: "另存为新文档",
+  librarySaved: (name) => `已保存 ${name}`,
+  libraryEmpty: "没有已保存的文档。",
+  libraryOpen: "打开",
+  libraryDelete: "删除",
+  libraryConfirmDelete: (name) => `要删除 ${name} 吗？此操作无法撤销。`,
+  libraryUnsaved: "有未保存的更改。仍要打开其他文档吗？",
+  libraryUnavailable: "此浏览器无法使用存储。",
+  libraryChars: (n) => `${n.toLocaleString("zh-CN")} 字`,
   faceTilt: "跟随面部旋转",
   faceTiltHint: "通过前置摄像头读取面部倾斜，让文字与视线对齐。躺着阅读时很有用。",
   faceTiltPrivacy: "画面仅在设备内处理，不会发送到任何地方。",
   faceTiltMode: "旋转方式",
   faceTiltSnap: "按 90 度",
   faceTiltFree: "自由旋转",
-  faceTiltFreeHint: "自由旋转时由 pretext 逐行重新计算宽度，把倾斜的屏幕填满。此时正文仅以文字显示。",
+  faceTiltFreeHint:
+    "自由旋转时由 pretext 逐行重新计算宽度，把倾斜的屏幕填满。此时正文仅以文字显示。",
   faceTiltInvert: "反转方向",
   faceTiltInvertHint: "如果文字转向相反，请打开。",
   faceTiltLoading: "正在准备摄像头…",
@@ -562,13 +619,27 @@ const zhTW: Messages = {
   syncScrollHint: "編輯區與預覽依相同比例捲動。",
   toc: "目錄",
   tocHint: "透過標題跳到預覽位置。",
+  library: "我的文件",
+  libraryDesc: "僅保存在此瀏覽器中的文件清單，不會傳送到其他裝置或伺服器。",
+  libraryCurrent: "目前文件",
+  librarySave: "儲存到瀏覽器",
+  librarySaveAsNew: "另存為新文件",
+  librarySaved: (name) => `已儲存 ${name}`,
+  libraryEmpty: "沒有已儲存的文件。",
+  libraryOpen: "開啟",
+  libraryDelete: "刪除",
+  libraryConfirmDelete: (name) => `要刪除 ${name} 嗎？此操作無法復原。`,
+  libraryUnsaved: "有未儲存的變更。仍要開啟其他文件嗎？",
+  libraryUnavailable: "此瀏覽器無法使用儲存空間。",
+  libraryChars: (n) => `${n.toLocaleString("zh-TW")} 字`,
   faceTilt: "跟隨臉部旋轉",
   faceTiltHint: "透過前鏡頭讀取臉部傾斜，讓文字與視線對齊。躺著閱讀時很實用。",
   faceTiltPrivacy: "影像僅在裝置內處理，不會傳送到任何地方。",
   faceTiltMode: "旋轉方式",
   faceTiltSnap: "以 90 度為單位",
   faceTiltFree: "自由旋轉",
-  faceTiltFreeHint: "自由旋轉時由 pretext 逐行重新計算寬度，將傾斜的畫面填滿。此時內文僅以文字顯示。",
+  faceTiltFreeHint:
+    "自由旋轉時由 pretext 逐行重新計算寬度，將傾斜的畫面填滿。此時內文僅以文字顯示。",
   faceTiltInvert: "反轉方向",
   faceTiltInvertHint: "若文字轉向相反，請開啟。",
   faceTiltLoading: "正在準備相機…",
@@ -684,13 +755,28 @@ const en: Messages = {
   syncScrollHint: "Move the editor and preview by the same ratio.",
   toc: "Contents",
   tocHint: "Jump the preview to a heading.",
+  library: "My documents",
+  libraryDesc: "Documents kept in this browser only. Nothing is sent to other devices or servers.",
+  libraryCurrent: "Current document",
+  librarySave: "Save in browser",
+  librarySaveAsNew: "Save as new",
+  librarySaved: (name) => `Saved ${name}`,
+  libraryEmpty: "No saved documents yet.",
+  libraryOpen: "Open",
+  libraryDelete: "Delete",
+  libraryConfirmDelete: (name) => `Delete ${name}? This cannot be undone.`,
+  libraryUnsaved: "You have unsaved changes. Open another document anyway?",
+  libraryUnavailable: "Storage is not available in this browser.",
+  libraryChars: (n) => `${n.toLocaleString("en")} chars`,
   faceTilt: "Follow your face",
-  faceTiltHint: "Reads your head tilt with the front camera and keeps the text level with your eyes. Handy when reading lying down.",
+  faceTiltHint:
+    "Reads your head tilt with the front camera and keeps the text level with your eyes. Handy when reading lying down.",
   faceTiltPrivacy: "Video is processed on this device only and never leaves it.",
   faceTiltMode: "Rotation",
   faceTiltSnap: "90° steps",
   faceTiltFree: "Free rotation",
-  faceTiltFreeHint: "In free rotation, pretext re-computes every line's width so text fills the tilted screen edge to edge. The body is shown as plain text.",
+  faceTiltFreeHint:
+    "In free rotation, pretext re-computes every line's width so text fills the tilted screen edge to edge. The body is shown as plain text.",
   faceTiltInvert: "Flip direction",
   faceTiltInvertHint: "Turn on if the text rotates the wrong way.",
   faceTiltLoading: "Starting the camera…",
@@ -744,14 +830,21 @@ export const MESSAGES: Record<AppLang, Messages> = {
 };
 
 export function isAppLang(value: unknown): value is AppLang {
-  return value === "ko" || value === "ja" || value === "zh-CN" || value === "zh-TW" || value === "en";
+  return (
+    value === "ko" || value === "ja" || value === "zh-CN" || value === "zh-TW" || value === "en"
+  );
 }
 
 export function detectBrowserLang(input?: string): AppLang {
   const raw = (input ?? (typeof navigator === "undefined" ? "" : navigator.language)).toLowerCase();
   if (raw.startsWith("ko")) return "ko";
   if (raw.startsWith("ja")) return "ja";
-  if (raw.startsWith("zh-tw") || raw.startsWith("zh-hant") || raw.includes("hk") || raw.includes("mo")) {
+  if (
+    raw.startsWith("zh-tw") ||
+    raw.startsWith("zh-hant") ||
+    raw.includes("hk") ||
+    raw.includes("mo")
+  ) {
     return "zh-TW";
   }
   if (raw.startsWith("zh")) return "zh-CN";

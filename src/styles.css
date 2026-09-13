@@ -428,8 +428,15 @@
 }
 
 .md-body .md-task-item input[type="checkbox"] {
-  margin-right: 0.5em;
+  /* Size the box from the font and center it on the line box, not on the
+     x-height: CJK glyphs sit higher than Latin lowercase, so `middle` alone
+     leaves the box visibly low. */
+  width: 1em;
+  height: 1em;
+  margin: 0 0.5em 0 0;
   vertical-align: middle;
+  position: relative;
+  top: -0.1em;
   accent-color: var(--md-fg);
 }
 

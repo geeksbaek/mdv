@@ -4,6 +4,7 @@ import {
   Download,
   Eye,
   FolderOpen,
+  Library,
   MoreHorizontal,
   PanelLeft,
   Printer,
@@ -15,7 +16,6 @@ import {
 import { toast } from "sonner";
 import { useFaceTiltRuntime } from "@/lib/face-tilt";
 import { messages } from "@/lib/i18n";
-import { SAMPLE_DOCUMENT } from "@/lib/sample-document";
 import { useDocument, useSettings, type ViewMode } from "@/lib/stores";
 import { Button } from "@/components/ui/button";
 import {
@@ -33,6 +33,7 @@ import {
   SheetTrigger,
 } from "@/components/ui/sheet";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
+import { LibrarySheet } from "@/components/library-sheet";
 import { SettingsPanel } from "@/components/settings-panel";
 import { ShareDialog } from "@/components/share-dialog";
 import { cn } from "@/lib/utils";
@@ -49,6 +50,9 @@ function Tip({ label, children }: { label: string; children: ReactNode }) {
 export function Toolbar({ mobile }: { mobile: boolean }) {
   const fileRef = useRef<HTMLInputElement>(null);
   const [shareOpen, setShareOpen] = useState(false);
+  const [libraryOpen, setLibraryOpen] = useState(false);
+  const dirty = useDocument((s) => s.dirty);
+  const libraryId = useDocument((s) => s.libraryId);
   const t = messages(useSettings((s) => s.uiLang));
   const viewMode = useSettings((s) => s.viewMode);
   const setView = (next: ViewMode) => useSettings.getState().set({ viewMode: next });
@@ -75,8 +79,7 @@ export function Toolbar({ mobile }: { mobile: boolean }) {
   const onFile = async (file: File | undefined) => {
     if (!file) return;
     const text = await file.text();
-    useDocument.getState().setMarkdown(text);
-    useDocument.getState().setFileName(file.name);
+    useDocument.getState().replace({ markdown: text, fileName: file.name });
     toast(t.openedFile(file.name));
   };
 
@@ -91,8 +94,7 @@ export function Toolbar({ mobile }: { mobile: boolean }) {
   };
 
   const loadSample = () => {
-    useDocument.getState().setMarkdown(SAMPLE_DOCUMENT);
-    useDocument.getState().setFileName("한지.md");
+    useDocument.getState().loadSample();
     toast(t.sampleLoaded);
   };
 
@@ -193,6 +195,24 @@ export function Toolbar({ mobile }: { mobile: boolean }) {
           </Tip>
         </div>
 
+        <Tip label={t.library}>
+          <Button
+            variant="ghost"
+            size="icon-sm"
+            className="relative"
+            onClick={() => setLibraryOpen(true)}
+          >
+            <Library />
+            {dirty && libraryId ? (
+              <span
+                aria-hidden
+                className="absolute top-1 right-1 size-1.5 rounded-full bg-foreground/70"
+              />
+            ) : null}
+            <span className="sr-only">{t.library}</span>
+          </Button>
+        </Tip>
+
         <Tip label={t.faceTilt}>
           <Button
             variant="ghost"
@@ -251,6 +271,7 @@ export function Toolbar({ mobile }: { mobile: boolean }) {
       </div>
 
       <ShareDialog open={shareOpen} onOpenChange={setShareOpen} />
+      <LibrarySheet open={libraryOpen} onOpenChange={setLibraryOpen} />
     </header>
   );
 }

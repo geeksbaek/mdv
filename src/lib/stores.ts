@@ -126,9 +126,16 @@ export const useSettings = create<SettingsState>()(
 export type DocumentState = {
   markdown: string;
   fileName: string;
+  /** Id in the browser library when this document was saved there or opened from it. */
+  libraryId: string | null;
+  /** True once the text changed after the last library save/open. */
+  dirty: boolean;
   setMarkdown: (markdown: string) => void;
   setFileName: (fileName: string) => void;
   loadSample: () => void;
+  /** Replace the whole document (file open, share link, library open). */
+  replace: (doc: { markdown: string; fileName: string; libraryId?: string | null }) => void;
+  markSaved: (libraryId: string, fileName: string) => void;
 };
 
 export const useDocument = create<DocumentState>()(
@@ -136,14 +143,26 @@ export const useDocument = create<DocumentState>()(
     (set) => ({
       markdown: SAMPLE_DOCUMENT,
       fileName: "한지.md",
-      setMarkdown: (markdown) => set({ markdown }),
+      libraryId: null,
+      dirty: false,
+      setMarkdown: (markdown) => set({ markdown, dirty: true }),
       setFileName: (fileName) => set({ fileName }),
-      loadSample: () => set({ markdown: SAMPLE_DOCUMENT, fileName: "한지.md" }),
+      loadSample: () =>
+        set({ markdown: SAMPLE_DOCUMENT, fileName: "한지.md", libraryId: null, dirty: false }),
+      replace: ({ markdown, fileName, libraryId = null }) =>
+        set({ markdown, fileName, libraryId, dirty: false }),
+      markSaved: (libraryId, fileName) => set({ libraryId, fileName, dirty: false }),
     }),
     {
       name: "hanji-document",
       skipHydration: true,
-      version: 1,
+      version: 2,
+      migrate: (persisted) => {
+        const state = { ...(persisted as Record<string, unknown>) };
+        if (typeof state.libraryId !== "string") state.libraryId = null;
+        if (typeof state.dirty !== "boolean") state.dirty = false;
+        return state as DocumentState;
+      },
     },
   ),
 );
