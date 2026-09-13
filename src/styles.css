@@ -403,8 +403,13 @@
   overflow-x: auto;
 }
 
+/* Size to the content, not to the measure: width 100% stretched a two-column
+   table of single characters across the whole page and handed the leftover
+   space out in proportions that looked arbitrary. A table wider than the
+   measure is capped here and wraps; the wrapper scrolls if it still cannot fit. */
 .md-body table {
-  width: 100%;
+  width: max-content;
+  max-width: 100%;
   border-collapse: collapse;
   font-size: 0.94em;
 }
