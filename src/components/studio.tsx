@@ -129,7 +129,6 @@ function useSyncScroll(
 export function Studio({ encoded }: { encoded?: string | null }) {
   useHydratedStores(encoded);
   const mobile = useMediaQuery("(max-width: 767px)");
-  const wide = useMediaQuery("(min-width: 1024px)");
   const editorRef = useRef<HTMLTextAreaElement>(null);
   const previewRef = useRef<HTMLDivElement>(null);
   const colors = useSettings((s) => s.colors);
@@ -166,14 +165,7 @@ export function Studio({ encoded }: { encoded?: string | null }) {
     document.documentElement.lang = uiLang;
   }, [uiLang]);
 
-  const resolvedView =
-    viewMode === "book"
-      ? wide
-        ? "book"
-        : "preview"
-      : mobile && viewMode === "split"
-        ? "preview"
-        : viewMode;
+  const resolvedView = mobile && viewMode === "split" ? "preview" : viewMode;
   const showEditor = resolvedView === "edit" || resolvedView === "split";
   const showPreview = resolvedView === "preview" || resolvedView === "split";
 

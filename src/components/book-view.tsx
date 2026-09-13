@@ -10,12 +10,13 @@ import {
   type PointerEvent as ReactPointerEvent,
 } from "react";
 import { articleStyle } from "@/lib/article-style";
+import { bookLayout, leafSpec, type Segment } from "@/lib/book-layout";
+import { useViewportSegments } from "@/lib/viewport-segments";
 import { isTyping } from "@/lib/utils";
 import { messages } from "@/lib/i18n";
 import { renderMarkdown } from "@/lib/markdown";
 import { useDocument, useSettings } from "@/lib/stores";
 
-const PAGE_RATIO = 1.42; // height / width
 const GAP = 48; // gap between CSS columns; also the inner margin of a page
 const PAD_Y = 40;
 const FLIP_MS = 520;
@@ -38,6 +39,8 @@ type PageProps = {
   style: CSSProperties;
   label: string;
   className?: string;
+  /** Left offset inside the spread. */
+  x: number;
 };
 
 /**
@@ -54,12 +57,13 @@ const Page = memo(function Page({
   style,
   label,
   className,
+  x,
 }: PageProps) {
   const inner = width - GAP * 2;
   const innerH = height - PAD_Y * 2;
   const blank = index < 0 || index >= total;
   return (
-    <div className={`md-book-page ${className ?? ""}`} style={{ width, height }}>
+    <div className={`md-book-page ${className ?? ""}`} style={{ width, height, left: x }}>
       {blank ? null : (
         <>
           <div
@@ -92,7 +96,7 @@ export function BookView() {
   const t = messages(settings.uiLang);
   const hostRef = useRef<HTMLDivElement>(null);
   const measureRef = useRef<HTMLElement>(null);
-  const [area, setArea] = useState({ width: 0, height: 0 });
+  const [area, setArea] = useState({ width: 0, height: 0, left: 0 });
   const [pageCount, setPageCount] = useState(1);
   const [spread, setSpread] = useState(0);
   const [flip, setFlip] = useState<Flip | null>(null);
@@ -100,6 +104,7 @@ export function BookView() {
   flipRef.current = flip;
   const animRef = useRef<number | null>(null);
   const [fontGen, setFontGen] = useState(0);
+  const viewportSegments = useViewportSegments();
 
   const html = useMemo(
     () =>
@@ -114,7 +119,10 @@ export function BookView() {
   useLayoutEffect(() => {
     const el = hostRef.current;
     if (!el) return;
-    const update = () => setArea({ width: el.clientWidth, height: el.clientHeight });
+    const update = () => {
+      const rect = el.getBoundingClientRect();
+      setArea({ width: el.clientWidth, height: el.clientHeight, left: rect.left });
+    };
     update();
     const observer = new ResizeObserver(update);
     observer.observe(el);
@@ -129,21 +137,19 @@ export function BookView() {
     return () => fonts.removeEventListener("loadingdone", onDone);
   }, []);
 
-  // Page size: two pages side by side, as tall as the area allows.
-  const page = useMemo(() => {
-    const availW = Math.max(0, area.width - 64);
-    const availH = Math.max(0, area.height - 48);
-    let width = Math.floor(availW / 2);
-    let height = Math.floor(width * PAGE_RATIO);
-    if (height > availH) {
-      height = availH;
-      width = Math.floor(height / PAGE_RATIO);
-    }
-    return { width, height };
-  }, [area]);
+  // Hinge segments relative to this host, when the device has one.
+  const segments = useMemo((): Segment[] | null => {
+    if (!viewportSegments || viewportSegments.length < 2) return null;
+    return viewportSegments.map((s) => ({ left: s.left - area.left, width: s.width }));
+  }, [viewportSegments, area.left]);
 
-  const inner = page.width - GAP * 2;
-  const innerH = page.height - PAD_Y * 2;
+  const layout = useMemo(
+    () => bookLayout(area.width, area.height, segments),
+    [area.width, area.height, segments],
+  );
+  const { pages, pageWidth, pageHeight, spineGap } = layout;
+  const inner = pageWidth - GAP * 2;
+  const innerH = pageHeight - PAD_Y * 2;
 
   // Count columns the article needs at this page size.
   useLayoutEffect(() => {
@@ -153,15 +159,22 @@ export function BookView() {
     setPageCount(count);
   }, [html, inner, innerH, style, fontGen]);
 
-  const spreadCount = Math.max(1, Math.ceil(pageCount / 2));
+  const spreadCount = Math.max(1, Math.ceil(pageCount / pages));
   useEffect(() => {
     setSpread((s) => Math.min(s, spreadCount - 1));
   }, [spreadCount]);
   useEffect(() => {
     setSpread(0);
   }, [markdown]);
+  // Keep roughly the same place when switching between one and two pages.
+  const prevPages = useRef(pages);
+  useEffect(() => {
+    if (prevPages.current === pages) return;
+    setSpread((s) => (pages === 2 ? Math.floor(s / 2) : s * 2));
+    prevPages.current = pages;
+  }, [pages]);
 
-  const left = spread * 2;
+  const left = spread * pages;
   const right = left + 1;
   const canForward = spread < spreadCount - 1;
   const canBack = spread > 0;
@@ -237,29 +250,53 @@ export function BookView() {
     return () => el.removeEventListener("wheel", onWheel);
   }, [turn]);
 
-  // Dragging a page corner: progress follows the pointer across the spread.
-  const drag = useRef<{ id: number; dir: 1 | -1; startX: number; moved: boolean } | null>(null);
+  // Dragging: mouse/pen grab an outer edge; a touch swipe works anywhere.
+  const drag = useRef<{ id: number; dir: 1 | -1 | 0; startX: number; moved: boolean } | null>(null);
 
-  const onPointerDown = (dir: 1 | -1) => (event: ReactPointerEvent<HTMLDivElement>) => {
-    if (flipRef.current) return;
-    if (dir === 1 && !canForward) return;
-    if (dir === -1 && !canBack) return;
+  const allowed = (dir: 1 | -1) => (dir === 1 ? canForward : canBack);
+
+  const beginDrag = (event: ReactPointerEvent<HTMLDivElement>, dir: 1 | -1 | 0) => {
+    if (flipRef.current || drag.current) return;
+    if (dir !== 0 && !allowed(dir)) return;
     drag.current = { id: event.pointerId, dir, startX: event.clientX, moved: false };
     event.currentTarget.setPointerCapture(event.pointerId);
-    setFlip({ dir, progress: 0, dragging: true });
+    if (dir !== 0) setFlip({ dir, progress: 0, dragging: true });
+  };
+  const onEdgePointerDown = (dir: 1 | -1) => (event: ReactPointerEvent<HTMLDivElement>) => {
+    if (event.pointerType === "touch") return; // handled by the spread's swipe
+    event.stopPropagation();
+    beginDrag(event, dir);
+  };
+  const onSpreadPointerDown = (event: ReactPointerEvent<HTMLDivElement>) => {
+    if (event.pointerType !== "touch") return;
+    beginDrag(event, 0);
   };
   const onPointerMove = (event: ReactPointerEvent<HTMLDivElement>) => {
     const d = drag.current;
     if (!d || d.id !== event.pointerId) return;
-    const travel = (event.clientX - d.startX) * -d.dir;
-    const progress = Math.min(1, Math.max(0, travel / (page.width * 1.6)));
-    if (Math.abs(event.clientX - d.startX) > 4) d.moved = true;
+    const dx = event.clientX - d.startX;
+    if (d.dir === 0) {
+      if (Math.abs(dx) < 10) return;
+      const dir: 1 | -1 = dx < 0 ? 1 : -1;
+      if (!allowed(dir)) {
+        drag.current = null;
+        return;
+      }
+      d.dir = dir;
+      d.startX = event.clientX;
+      setFlip({ dir, progress: 0, dragging: true });
+      return;
+    }
+    const travel = dx * -d.dir;
+    const progress = Math.min(1, Math.max(0, travel / (pageWidth * 1.3)));
+    if (Math.abs(dx) > 4) d.moved = true;
     setFlip({ dir: d.dir, progress, dragging: true });
   };
   const onPointerUp = (event: ReactPointerEvent<HTMLDivElement>) => {
     const d = drag.current;
     if (!d || d.id !== event.pointerId) return;
     drag.current = null;
+    if (d.dir === 0) return;
     const current = flipRef.current?.progress ?? 0;
     if (!d.moved) {
       animateTo(d.dir, 0, 1); // a plain click turns the page
@@ -268,80 +305,110 @@ export function BookView() {
     animateTo(d.dir, current, current > 0.3 ? 1 : 0);
   };
 
-  const pageProps = { total: pageCount, html, width: page.width, height: page.height, style };
+  const pageProps = { total: pageCount, html, width: pageWidth, height: pageHeight, style };
   const label = (index: number) => t.bookPage(index + 1, pageCount);
-  const angle = flip ? flip.progress * 180 : 0;
-  const shade = flip ? Math.sin((flip.progress * Math.PI) / 1) : 0;
+  const shade = flip ? Math.sin(flip.progress * Math.PI) : 0;
+  const leaf = flip ? leafSpec(layout, spread, flip.dir, flip.progress) : null;
+  const rightX = pageWidth + spineGap;
 
-  // Pages under the leaf while it turns.
-  const underLeft = flip?.dir === -1 ? left - 2 : left;
-  const underRight = flip?.dir === 1 ? right + 2 : right;
+  // Pages that stay put while the leaf turns.
+  const baseLeft =
+    pages === 2 ? (flip?.dir === -1 ? left - 2 : left) : flip?.dir === 1 ? spread + 1 : spread;
+  const baseRight = flip?.dir === 1 ? right + 2 : right;
 
-  if (page.width <= 0) return <div ref={hostRef} className="md-book" />;
+  if (pageWidth <= 0) return <div ref={hostRef} className="md-book" />;
+
+  const spreadStyle: CSSProperties = {
+    width: pageWidth * pages + spineGap,
+    height: pageHeight,
+    ...(layout.left !== null
+      ? {
+          position: "absolute",
+          left: layout.left,
+          top: Math.max(0, (area.height - pageHeight) / 2 - 12),
+        }
+      : {}),
+  };
 
   return (
     <div ref={hostRef} className="md-book" style={{ background: settings.colors.bg }}>
       <div
         className="md-book-spread"
-        style={
-          {
-            width: page.width * 2,
-            height: page.height,
-            "--flip-ms": `${FLIP_MS}ms`,
-          } as CSSProperties
-        }
+        style={spreadStyle}
         aria-label={t.book}
+        onPointerDown={onSpreadPointerDown}
+        onPointerMove={onPointerMove}
+        onPointerUp={onPointerUp}
+        onPointerCancel={onPointerUp}
       >
-        <Page {...pageProps} index={underLeft} label={label(underLeft)} className="md-book-left" />
         <Page
           {...pageProps}
-          index={underRight}
-          label={label(underRight)}
-          className="md-book-right"
+          index={baseLeft}
+          label={label(baseLeft)}
+          className={pages === 2 ? "md-book-left" : "md-book-single"}
+          x={0}
         />
+        {pages === 2 ? (
+          <Page
+            {...pageProps}
+            index={baseRight}
+            label={label(baseRight)}
+            className="md-book-right"
+            x={rightX}
+          />
+        ) : null}
 
-        {flip ? (
+        {leaf ? (
           <div
-            className={`md-book-leaf ${flip.dir === 1 ? "md-book-leaf-right" : "md-book-leaf-left"}`}
+            className="md-book-leaf"
             style={{
-              width: page.width,
-              height: page.height,
-              transform: `rotateY(${-flip.dir * angle}deg)`,
+              left: leaf.x,
+              width: pageWidth,
+              height: pageHeight,
+              transformOrigin: leaf.origin === "left" ? "left center" : "right center",
+              transform: `rotateY(${leaf.rotate}deg)`,
             }}
           >
-            <div className="md-book-face md-book-face-front">
-              <Page
-                {...pageProps}
-                index={flip.dir === 1 ? right : left}
-                label={label(flip.dir === 1 ? right : left)}
-                className={flip.dir === 1 ? "md-book-right" : "md-book-left"}
-              />
-              <div className="md-book-shade" style={{ opacity: shade * 0.35 }} />
-            </div>
-            <div className="md-book-face md-book-face-back">
-              <Page
-                {...pageProps}
-                index={flip.dir === 1 ? right + 1 : left - 1}
-                label={label(flip.dir === 1 ? right + 1 : left - 1)}
-                className={flip.dir === 1 ? "md-book-left" : "md-book-right"}
-              />
-              <div className="md-book-shade" style={{ opacity: shade * 0.35 }} />
-            </div>
+            {/* Only the face that is toward the viewer exists, so nothing can bleed through. */}
+            {leaf.showingBack ? (
+              <div className="md-book-face md-book-face-back">
+                <Page
+                  {...pageProps}
+                  index={leaf.back}
+                  label={label(leaf.back)}
+                  className={leaf.backSide === "left" ? "md-book-left" : "md-book-right"}
+                  x={0}
+                />
+              </div>
+            ) : (
+              <div className="md-book-face">
+                <Page
+                  {...pageProps}
+                  index={leaf.front}
+                  label={label(leaf.front)}
+                  className={leaf.frontSide === "left" ? "md-book-left" : "md-book-right"}
+                  x={0}
+                />
+              </div>
+            )}
+            <div className="md-book-shade" style={{ opacity: shade * 0.35 }} />
           </div>
         ) : null}
 
-        <div className="md-book-spine" />
+        {pages === 2 ? (
+          <div className="md-book-spine" style={{ left: pageWidth + spineGap / 2 }} />
+        ) : null}
         {flip ? (
           <div
             className={`md-book-cast ${flip.dir === 1 ? "md-book-cast-right" : "md-book-cast-left"}`}
-            style={{ opacity: shade * 0.5 }}
+            style={{ opacity: shade * 0.5, width: pageWidth, left: flip.dir === 1 ? rightX : 0 }}
           />
         ) : null}
 
         <div
           className="md-book-grab md-book-grab-left"
-          style={{ width: page.width * GRAB_ZONE, cursor: canBack ? "grab" : "default" }}
-          onPointerDown={onPointerDown(-1)}
+          style={{ width: pageWidth * GRAB_ZONE, cursor: canBack ? "grab" : "default" }}
+          onPointerDown={onEdgePointerDown(-1)}
           onPointerMove={onPointerMove}
           onPointerUp={onPointerUp}
           onPointerCancel={onPointerUp}
@@ -349,8 +416,8 @@ export function BookView() {
         />
         <div
           className="md-book-grab md-book-grab-right"
-          style={{ width: page.width * GRAB_ZONE, cursor: canForward ? "grab" : "default" }}
-          onPointerDown={onPointerDown(1)}
+          style={{ width: pageWidth * GRAB_ZONE, cursor: canForward ? "grab" : "default" }}
+          onPointerDown={onEdgePointerDown(1)}
           onPointerMove={onPointerMove}
           onPointerUp={onPointerUp}
           onPointerCancel={onPointerUp}

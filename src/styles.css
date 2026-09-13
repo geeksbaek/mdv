@@ -604,6 +604,7 @@
 
 .md-book-spread {
   position: relative;
+  touch-action: pan-y;
   perspective: 2600px;
   perspective-origin: 50% 50%;
   transform-style: preserve-3d;
@@ -619,15 +620,17 @@
 }
 
 .md-book-left {
-  left: 0;
   border-radius: 6px 0 0 6px;
   box-shadow: inset -14px 0 22px -18px rgb(0 0 0 / 0.45);
 }
 
 .md-book-right {
-  left: 50%;
   border-radius: 0 6px 6px 0;
   box-shadow: inset 14px 0 22px -18px rgb(0 0 0 / 0.45);
+}
+
+.md-book-single {
+  border-radius: 6px;
 }
 
 .md-book-clip {
@@ -684,7 +687,6 @@
   position: absolute;
   top: 0;
   bottom: 0;
-  left: 50%;
   width: 2px;
   margin-left: -1px;
   background: linear-gradient(to right, rgb(0 0 0 / 0.18), rgb(0 0 0 / 0.05));
@@ -699,29 +701,14 @@
   z-index: 3;
 }
 
-.md-book-leaf-right {
-  left: 50%;
-  transform-origin: left center;
-}
-
-.md-book-leaf-left {
-  left: 0;
-  transform-origin: right center;
-}
-
 .md-book-face {
   position: absolute;
   inset: 0;
-  backface-visibility: hidden;
-  -webkit-backface-visibility: hidden;
   overflow: hidden;
 }
 
-/* Faces hold a page whose absolute offset is relative to the spread; undo it. */
-.md-book-face .md-book-page {
-  left: 0;
-}
-
+/* The back face is mounted only once the leaf is past 90°, pre-rotated so its
+   text reads normally; no backface-visibility needed (unreliable on WebKit). */
 .md-book-face-back {
   transform: rotateY(180deg);
 }
@@ -737,18 +724,15 @@
   position: absolute;
   top: 0;
   bottom: 0;
-  width: 50%;
   pointer-events: none;
   z-index: 2;
 }
 
 .md-book-cast-right {
-  left: 50%;
   background: linear-gradient(to right, rgb(0 0 0 / 0.5), rgb(0 0 0 / 0) 60%);
 }
 
 .md-book-cast-left {
-  left: 0;
   background: linear-gradient(to left, rgb(0 0 0 / 0.5), rgb(0 0 0 / 0) 60%);
 }
 

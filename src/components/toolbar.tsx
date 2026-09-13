@@ -130,7 +130,7 @@ export function Toolbar({ mobile }: { mobile: boolean }) {
       <div className="ml-1 flex rounded-lg bg-muted p-0.5">
         {views.map((view) => {
           const Icon = view.icon;
-          if (view.id === "split" || view.id === "book") {
+          if (view.id === "split") {
             return (
               <Tip key={view.id} label={view.label}>
                 <Button
@@ -138,7 +138,7 @@ export function Toolbar({ mobile }: { mobile: boolean }) {
                   size="icon-sm"
                   aria-pressed={viewMode === view.id}
                   className={cn(
-                    view.id === "book" ? "max-lg:hidden" : "max-md:hidden",
+                    "max-md:hidden",
                     viewMode === view.id && "bg-background shadow-[var(--shadow-border)]",
                   )}
                   onClick={() => setView(view.id)}
@@ -149,9 +149,7 @@ export function Toolbar({ mobile }: { mobile: boolean }) {
               </Tip>
             );
           }
-          const active =
-            (mobile && (viewMode === "split" || viewMode === "book") ? "preview" : viewMode) ===
-            view.id;
+          const active = (mobile && viewMode === "split" ? "preview" : viewMode) === view.id;
           return (
             <Tip key={view.id} label={view.label}>
               <Button
