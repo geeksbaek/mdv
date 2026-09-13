@@ -87,6 +87,7 @@ export type Messages = {
   faceTiltMode: string;
   faceTiltSnap: string;
   faceTiltFree: string;
+  faceTiltFreeHint: string;
   faceTiltInvert: string;
   faceTiltInvertHint: string;
   faceTiltLoading: string;
@@ -201,6 +202,7 @@ const ko: Messages = {
   faceTiltMode: "회전 방식",
   faceTiltSnap: "90도 단위",
   faceTiltFree: "자유 회전",
+  faceTiltFreeHint: "자유 회전에서는 pretext로 줄마다 폭을 다시 계산해 기울어진 화면을 끝까지 채웁니다. 이때는 본문이 글자만으로 표시됩니다.",
   faceTiltInvert: "방향 반전",
   faceTiltInvertHint: "글이 반대로 돌면 켜세요.",
   faceTiltLoading: "카메라를 준비하는 중…",
@@ -322,6 +324,7 @@ const ja: Messages = {
   faceTiltMode: "回転方式",
   faceTiltSnap: "90度単位",
   faceTiltFree: "自由回転",
+  faceTiltFreeHint: "自由回転では pretext が行ごとに幅を計算し直し、傾いた画面を端まで埋めます。本文は文字のみで表示されます。",
   faceTiltInvert: "方向を反転",
   faceTiltInvertHint: "逆方向に回る場合はオンにしてください。",
   faceTiltLoading: "カメラを準備中…",
@@ -443,6 +446,7 @@ const zhCN: Messages = {
   faceTiltMode: "旋转方式",
   faceTiltSnap: "按 90 度",
   faceTiltFree: "自由旋转",
+  faceTiltFreeHint: "自由旋转时由 pretext 逐行重新计算宽度，把倾斜的屏幕填满。此时正文仅以文字显示。",
   faceTiltInvert: "反转方向",
   faceTiltInvertHint: "如果文字转向相反，请打开。",
   faceTiltLoading: "正在准备摄像头…",
@@ -564,6 +568,7 @@ const zhTW: Messages = {
   faceTiltMode: "旋轉方式",
   faceTiltSnap: "以 90 度為單位",
   faceTiltFree: "自由旋轉",
+  faceTiltFreeHint: "自由旋轉時由 pretext 逐行重新計算寬度，將傾斜的畫面填滿。此時內文僅以文字顯示。",
   faceTiltInvert: "反轉方向",
   faceTiltInvertHint: "若文字轉向相反，請開啟。",
   faceTiltLoading: "正在準備相機…",
@@ -685,6 +690,7 @@ const en: Messages = {
   faceTiltMode: "Rotation",
   faceTiltSnap: "90° steps",
   faceTiltFree: "Free rotation",
+  faceTiltFreeHint: "In free rotation, pretext re-computes every line's width so text fills the tilted screen edge to edge. The body is shown as plain text.",
   faceTiltInvert: "Flip direction",
   faceTiltInvertHint: "Turn on if the text rotates the wrong way.",
   faceTiltLoading: "Starting the camera…",

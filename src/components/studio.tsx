@@ -221,7 +221,11 @@ export function Studio({ encoded }: { encoded?: string | null }) {
           </div>
         ) : (
           <div className="min-h-0 min-w-0 flex-1">
-            <TiltFrame angle={tilt.angle} active={faceTilt && tilt.status !== "off"}>
+            <TiltFrame
+              angle={tilt.angle}
+              mode={faceTiltMode}
+              active={faceTilt && tilt.status !== "off"}
+            >
               <MarkdownPreview scrollRef={previewRef} dark={isDarkHex(colors.bg)} />
             </TiltFrame>
           </div>

@@ -1,9 +1,11 @@
 import { useEffect, useRef, useState, type CSSProperties, type ReactNode } from "react";
-import { coarsen, fitRotatedBox } from "@/lib/face-tilt";
+import { coarsen, fitRotatedBox, type FaceTiltMode } from "@/lib/face-tilt";
+import { TiltedReader } from "@/components/tilted-reader";
 
 type Props = {
   angle: number;
   active: boolean;
+  mode: FaceTiltMode;
   children: ReactNode;
 };
 
@@ -12,7 +14,7 @@ type Props = {
  * resized so it always fits the viewport after rotation, keeping text at its
  * real size instead of scaling it.
  */
-export function TiltFrame({ angle, active, children }: Props) {
+export function TiltFrame({ angle, active, mode, children }: Props) {
   const ref = useRef<HTMLDivElement>(null);
   const [size, setSize] = useState({ width: 0, height: 0 });
 
@@ -28,6 +30,11 @@ export function TiltFrame({ angle, active, children }: Props) {
 
   if (!active) {
     return <div className="h-full min-w-0">{children}</div>;
+  }
+
+  // Free rotation re-flows the text with pretext so every line spans the tilted screen.
+  if (mode === "free") {
+    return <TiltedReader angle={angle} />;
   }
 
   const exact = size.width > 0 ? fitRotatedBox(size.width, size.height, angle) : size;

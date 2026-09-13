@@ -68,3 +68,88 @@ export function fitRotatedBox(
   }
   return { width: floor(width * upright), height: floor(height * upright) };
 }
+
+export type Chord = { start: number; width: number };
+
+/**
+ * Screen rectangle (`width` × `height`, centered at the origin) expressed in the
+ * text frame that is rotated by `angle` degrees (CSS clockwise, y down), as a
+ * convex polygon of four points `{ u, v }`.
+ */
+export function screenPolygon(
+  width: number,
+  height: number,
+  angle: number,
+): Array<{ u: number; v: number }> {
+  const rad = (angle * Math.PI) / 180;
+  const c = Math.cos(rad);
+  const s = Math.sin(rad);
+  const hw = width / 2;
+  const hh = height / 2;
+  // Inverse rotation: screen (x, y) → text-frame (u, v).
+  return [
+    [-hw, -hh],
+    [hw, -hh],
+    [hw, hh],
+    [-hw, hh],
+  ].map(([x, y]) => ({ u: x * c + y * s, v: -x * s + y * c }));
+}
+
+/** Horizontal extent of the polygon at height `v`, or null when `v` is outside it. */
+export function chordAt(polygon: Array<{ u: number; v: number }>, v: number): Chord | null {
+  let min = Infinity;
+  let max = -Infinity;
+  for (let i = 0; i < polygon.length; i++) {
+    const p = polygon[i]!;
+    const q = polygon[(i + 1) % polygon.length]!;
+    if (p.v === q.v) {
+      if (p.v === v) {
+        min = Math.min(min, p.u, q.u);
+        max = Math.max(max, p.u, q.u);
+      }
+      continue;
+    }
+    const lo = Math.min(p.v, q.v);
+    const hi = Math.max(p.v, q.v);
+    if (v < lo || v > hi) continue;
+    const t = (v - p.v) / (q.v - p.v);
+    const u = p.u + (q.u - p.u) * t;
+    min = Math.min(min, u);
+    max = Math.max(max, u);
+  }
+  if (min === Infinity || max - min <= 0) return null;
+  return { start: min, width: max - min };
+}
+
+/**
+ * Horizontal extent available to a full line band `[v, v + lineHeight]`: the part
+ * of the polygon that every row of the band shares. Convexity makes that the
+ * intersection of the chords at the band's two edges.
+ */
+export function bandChord(
+  polygon: Array<{ u: number; v: number }>,
+  v: number,
+  lineHeight: number,
+): Chord | null {
+  const top = chordAt(polygon, v);
+  const bottom = chordAt(polygon, v + lineHeight);
+  if (!top || !bottom) return null;
+  const start = Math.max(top.start, bottom.start);
+  const end = Math.min(top.start + top.width, bottom.start + bottom.width);
+  if (end - start <= 0) return null;
+  return { start, width: end - start };
+}
+
+/** Vertical extent of the polygon. */
+export function verticalExtent(polygon: Array<{ u: number; v: number }>): {
+  min: number;
+  max: number;
+} {
+  let min = Infinity;
+  let max = -Infinity;
+  for (const p of polygon) {
+    min = Math.min(min, p.v);
+    max = Math.max(max, p.v);
+  }
+  return { min, max };
+}

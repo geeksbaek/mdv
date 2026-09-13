@@ -443,6 +443,7 @@ export function SettingsPanel() {
               <option value="snap">{t.faceTiltSnap}</option>
             </NativeSelect>
           </Field>
+          <p className="text-xs text-muted-foreground">{t.faceTiltFreeHint}</p>
           <div className="flex items-center justify-between gap-3">
             <div className="grid gap-1 pr-3">
               <Label>{t.faceTiltInvert}</Label>

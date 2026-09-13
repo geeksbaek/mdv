@@ -69,26 +69,30 @@ function highlight(code: string, lang: string): string {
 }
 
 function mathBlockPlugin(md: MarkdownItType) {
-  md.block.ruler.before("fence", "math_block", (state: StateBlock, start: number, end: number, silent: boolean) => {
-    const startInfo = state.getLines(start, start + 1, 0, false).trim();
-    if (startInfo !== "$$") return false;
-    let next = start + 1;
-    while (next < end) {
-      const line = state.getLines(next, next + 1, 0, false).trim();
-      if (line === "$$") break;
-      next += 1;
-    }
-    if (next >= end) return false;
-    if (silent) return true;
-    const content = state.getLines(start + 1, next, 0, false);
-    const token = state.push("math_block", "div", 0);
-    token.markup = "$$";
-    token.content = content.trim();
-    token.map = [start, next + 1];
-    token.block = true;
-    state.line = next + 1;
-    return true;
-  });
+  md.block.ruler.before(
+    "fence",
+    "math_block",
+    (state: StateBlock, start: number, end: number, silent: boolean) => {
+      const startInfo = state.getLines(start, start + 1, 0, false).trim();
+      if (startInfo !== "$$") return false;
+      let next = start + 1;
+      while (next < end) {
+        const line = state.getLines(next, next + 1, 0, false).trim();
+        if (line === "$$") break;
+        next += 1;
+      }
+      if (next >= end) return false;
+      if (silent) return true;
+      const content = state.getLines(start + 1, next, 0, false);
+      const token = state.push("math_block", "div", 0);
+      token.markup = "$$";
+      token.content = content.trim();
+      token.map = [start, next + 1];
+      token.block = true;
+      state.line = next + 1;
+      return true;
+    },
+  );
 
   md.renderer.rules.math_block = (tokens: Token[], idx: number) => {
     const tex = tokens[idx]?.content ?? "";
@@ -199,7 +203,11 @@ function taskListPlugin(md: MarkdownItType) {
       const inline = tokens[i];
       const paragraph = tokens[i - 1];
       const item = tokens[i - 2];
-      if (inline?.type !== "inline" || paragraph?.type !== "paragraph_open" || item?.type !== "list_item_open") {
+      if (
+        inline?.type !== "inline" ||
+        paragraph?.type !== "paragraph_open" ||
+        item?.type !== "list_item_open"
+      ) {
         continue;
       }
       const children = inline.children;
@@ -331,6 +339,143 @@ export function renderMarkdown(source: string, options: RenderOptions): RenderRe
   const html = md.renderer.render(tokens, md.options, env);
   const headings = collectHeadings(tokens);
   return { html, headings };
+}
+
+export type TextBlockKind = "h1" | "h2" | "h3" | "p" | "li" | "quote" | "code";
+
+export type TextBlock = {
+  kind: TextBlockKind;
+  text: string;
+  /** Nesting depth for list items and quotes (0 = top level). */
+  depth: number;
+};
+
+function inlineText(token: Token): string {
+  const children = token.children;
+  if (!children) return token.content;
+  let out = "";
+  for (const child of children) {
+    switch (child.type) {
+      case "text":
+      case "code_inline":
+      case "math_inline":
+        out += child.content;
+        break;
+      case "softbreak":
+      case "hardbreak":
+        out += " ";
+        break;
+      case "image":
+        out += child.content ? `[${child.content}]` : "";
+        break;
+      case "footnote_ref":
+        out += `[${String(child.meta?.label ?? child.meta?.id ?? "")}]`;
+        break;
+      default:
+        if (child.children) out += inlineText(child);
+        break;
+    }
+  }
+  return out.replace(/\s+/g, " ").trim();
+}
+
+/**
+ * Flatten a document into plain-text blocks for layout engines that only
+ * understand text (the tilted reader). Inline formatting is dropped; tables
+ * become one line per row; code keeps its line breaks.
+ */
+export function extractBlocks(source: string, options: RenderOptions): TextBlock[] {
+  const md = getParser(options);
+  const tokens = md.parse(source, {});
+  const blocks: TextBlock[] = [];
+  let listDepth = 0;
+  let quoteDepth = 0;
+  let headingLevel: TextBlockKind | null = null;
+  const ordered: number[] = [];
+  let pendingPrefix = "";
+  const row: string[] = [];
+  let inTable = false;
+
+  const push = (kind: TextBlockKind, text: string) => {
+    if (!text) return;
+    blocks.push({ kind, text, depth: Math.max(0, listDepth - 1) + quoteDepth });
+  };
+
+  for (const token of tokens) {
+    switch (token.type) {
+      case "heading_open": {
+        const level = Number(token.tag.slice(1));
+        headingLevel = level <= 1 ? "h1" : level === 2 ? "h2" : "h3";
+        break;
+      }
+      case "heading_close":
+        headingLevel = null;
+        break;
+      case "bullet_list_open":
+        listDepth += 1;
+        ordered.push(0);
+        break;
+      case "ordered_list_open":
+        listDepth += 1;
+        ordered.push(Number(token.attrGet("start") ?? 1));
+        break;
+      case "bullet_list_close":
+      case "ordered_list_close":
+        listDepth -= 1;
+        ordered.pop();
+        break;
+      case "list_item_open": {
+        const n = ordered[ordered.length - 1] ?? 0;
+        if (n > 0) {
+          pendingPrefix = `${n}. `;
+          ordered[ordered.length - 1] = n + 1;
+        } else {
+          pendingPrefix = "• ";
+        }
+        break;
+      }
+      case "blockquote_open":
+        quoteDepth += 1;
+        break;
+      case "blockquote_close":
+        quoteDepth -= 1;
+        break;
+      case "table_open":
+        inTable = true;
+        break;
+      case "table_close":
+        inTable = false;
+        break;
+      case "tr_close":
+        push("p", row.join("  |  "));
+        row.length = 0;
+        break;
+      case "inline": {
+        const text = inlineText(token);
+        if (inTable) {
+          row.push(text);
+        } else if (headingLevel) {
+          push(headingLevel, text);
+        } else if (listDepth > 0) {
+          push("li", pendingPrefix + text);
+          pendingPrefix = "";
+        } else if (quoteDepth > 0) {
+          push("quote", text);
+        } else {
+          push("p", text);
+        }
+        break;
+      }
+      case "fence":
+      case "code_block":
+      case "math_block":
+        push("code", token.content.replace(/\n+$/, ""));
+        break;
+      default:
+        break;
+    }
+  }
+  return blocks;
 }
 
 export function primaryHeading(headings: Heading[]): string | undefined {

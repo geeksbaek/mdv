@@ -89,3 +89,34 @@ describe("fitRotatedBox", () => {
     assert.ok(width > 0 && height > 0);
   });
 });
+
+describe("screen geometry", () => {
+  it("is the plain rectangle at 0°", async () => {
+    const { screenPolygon, bandChord, verticalExtent } = await import("./face-tilt-math.ts");
+    const poly = screenPolygon(400, 800, 0);
+    assert.deepEqual(verticalExtent(poly), { min: -400, max: 400 });
+    const chord = bandChord(poly, -100, 30);
+    assert.ok(chord);
+    assert.ok(Math.abs(chord.start + 200) < 1e-9 && Math.abs(chord.width - 400) < 1e-9);
+  });
+
+  it("swaps extents at 90°", async () => {
+    const { screenPolygon, bandChord, verticalExtent } = await import("./face-tilt-math.ts");
+    const poly = screenPolygon(400, 800, 90);
+    const ext = verticalExtent(poly);
+    assert.ok(Math.abs(ext.min + 200) < 1e-9 && Math.abs(ext.max - 200) < 1e-9);
+    const chord = bandChord(poly, -50, 30);
+    assert.ok(chord && Math.abs(chord.width - 800) < 1e-9);
+  });
+
+  it("gives narrower chords near the corners when tilted", async () => {
+    const { screenPolygon, bandChord, verticalExtent } = await import("./face-tilt-math.ts");
+    const poly = screenPolygon(400, 800, 30);
+    const { min, max } = verticalExtent(poly);
+    const nearTop = bandChord(poly, min + 5, 20);
+    const middle = bandChord(poly, (min + max) / 2, 20);
+    assert.ok(nearTop && middle);
+    assert.ok(nearTop.width < middle.width);
+    assert.equal(bandChord(poly, max - 5, 20), null);
+  });
+});

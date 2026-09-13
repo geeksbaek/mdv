@@ -15,6 +15,8 @@ export type FaceTiltState = {
   /** Rotation to apply to the reading surface, in degrees (CSS clockwise). */
   angle: number;
   status: FaceTiltStatus;
+  /** Dev only: when set, the camera loop stops writing so automation can drive the angle. */
+  devLock?: boolean;
 };
 
 type Options = {
@@ -36,6 +38,10 @@ const HOLD_AFTER_LOST_MS = 3000;
 
 /** Live tracking state, readable from anywhere (toolbar, settings) without prop drilling. */
 export const useFaceTiltRuntime = create<FaceTiltState>(() => ({ angle: 0, status: "off" }));
+if (import.meta.env.DEV && typeof window !== "undefined") {
+  // Lets a dev session drive the angle without a camera (e.g. browser automation).
+  (window as unknown as { __faceTilt?: typeof useFaceTiltRuntime }).__faceTilt = useFaceTiltRuntime;
+}
 
 export function useFaceTilt({ enabled, mode, invert }: Options): FaceTiltState {
   const state = useFaceTiltRuntime();
@@ -109,6 +115,10 @@ export function useFaceTilt({ enabled, mode, invert }: Options): FaceTiltState {
         }
       }
 
+      if (import.meta.env.DEV && useFaceTiltRuntime.getState().devLock) {
+        timer = setTimeout(tick, SAMPLE_INTERVAL_MS);
+        return;
+      }
       const lost = !seen && now - lastSeen > HOLD_AFTER_LOST_MS;
       const target = lost ? 0 : raw;
       smoothed =
