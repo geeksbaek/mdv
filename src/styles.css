@@ -176,9 +176,9 @@
   left: 50%;
   transform-origin: center;
   transition:
-    transform 0.3s ease-out,
-    width 0.3s ease-out,
-    height 0.3s ease-out;
+    transform 0.12s linear,
+    width 0.2s ease-out,
+    height 0.2s ease-out;
   will-change: transform;
 }
 

@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState, type CSSProperties, type ReactNode } from "react";
-import { fitRotatedBox } from "@/lib/face-tilt";
+import { coarsen, fitRotatedBox } from "@/lib/face-tilt";
 
 type Props = {
   angle: number;
@@ -30,7 +30,11 @@ export function TiltFrame({ angle, active, children }: Props) {
     return <div className="h-full min-w-0">{children}</div>;
   }
 
-  const box = size.width > 0 ? fitRotatedBox(size.width, size.height, angle) : size;
+  const exact = size.width > 0 ? fitRotatedBox(size.width, size.height, angle) : size;
+  // At right angles fill the viewport exactly; in between, change the box only in coarse steps
+  // so text doesn't rewrap on every degree of head movement.
+  const box =
+    angle % 90 === 0 ? exact : { width: coarsen(exact.width), height: coarsen(exact.height) };
   const style: CSSProperties = {
     width: box.width,
     height: box.height,

@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import { describe, it } from "node:test";
-import { easeFree, fitRotatedBox, rollFromEyes, snapQuadrant } from "./face-tilt-math.ts";
+import { coarsen, easeFree, fitRotatedBox, rollFromEyes, snapQuadrant } from "./face-tilt-math.ts";
 
 describe("rollFromEyes", () => {
   it("is level for an upright face", () => {
@@ -42,13 +42,32 @@ describe("snapQuadrant", () => {
 });
 
 describe("easeFree", () => {
-  it("ignores jitter inside the dead zone", () => {
-    assert.equal(easeFree(2, 0), 0);
+  it("ignores sub-degree jitter", () => {
+    assert.equal(easeFree(0.6, 0), 0);
   });
 
-  it("moves part of the way toward the target", () => {
+  it("moves in whole degrees toward the target", () => {
     const next = easeFree(20, 0);
     assert.ok(next > 0 && next < 20);
+    assert.equal(next, Math.round(next));
+  });
+
+  it("always advances at least one degree when off target", () => {
+    assert.equal(easeFree(1.4, 0), 1);
+    assert.equal(easeFree(-1.4, 0), -1);
+  });
+
+  it("converges exactly on the target", () => {
+    let a = 0;
+    for (let i = 0; i < 30; i++) a = easeFree(37, a);
+    assert.equal(a, 37);
+  });
+});
+
+describe("coarsen", () => {
+  it("rounds down to the coarse step and never below one step", () => {
+    assert.equal(coarsen(390), 384);
+    assert.equal(coarsen(10), 24);
   });
 });
 

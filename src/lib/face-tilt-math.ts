@@ -1,7 +1,9 @@
 /** Pure geometry for face-following rotation. Kept free of browser imports so it can be unit-tested in Node. */
 
-/** Ignore jitter below this amount in free mode. */
-const DEAD_ZONE_DEG = 2.5;
+/** Ignore jitter below this amount in free mode (output is quantized to whole degrees). */
+const DEAD_ZONE_DEG = 1;
+/** Free-mode reading box is resized only in steps this large so lines don't rewrap on every degree. */
+const BOX_STEP_PX = 24;
 /** Extra angle needed beyond a 45° boundary before snapping to the next quadrant. */
 const SNAP_HYSTERESIS_DEG = 12;
 function normalize(deg: number): number {
@@ -30,11 +32,17 @@ export function snapQuadrant(angle: number, current: number): number {
   return normalize(Math.round(angle / 90) * 90);
 }
 
-/** Smooth free-mode angle with a dead zone and exponential easing. */
+/** Follow the target in whole-degree steps: ease part of the way, always at least one degree. */
 export function easeFree(target: number, current: number): number {
   const diff = normalize(target - current);
   if (Math.abs(diff) < DEAD_ZONE_DEG) return current;
-  return normalize(current + diff * 0.35);
+  const step = Math.sign(diff) * Math.max(1, Math.abs(diff) * 0.5);
+  return normalize(Math.round(current + step));
+}
+
+/** Round a box dimension down to the coarse step used in free mode. */
+export function coarsen(value: number): number {
+  return Math.max(BOX_STEP_PX, Math.floor(value / BOX_STEP_PX) * BOX_STEP_PX);
 }
 
 /**

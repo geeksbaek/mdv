@@ -6,7 +6,7 @@ import wasmBinaryPath from "@mediapipe/tasks-vision/vision_wasm_internal.wasm?ur
 
 import { easeFree, rollFromEyes, snapQuadrant } from "@/lib/face-tilt-math";
 
-export { fitRotatedBox } from "@/lib/face-tilt-math";
+export { coarsen, fitRotatedBox } from "@/lib/face-tilt-math";
 export type FaceTiltMode = "snap" | "free";
 export type FaceTiltStatus =
   "off" | "loading" | "tracking" | "lost" | "denied" | "unsupported" | "error";
@@ -30,7 +30,7 @@ const MODEL_URL = "/models/face_landmarker.task";
 const RIGHT_EYE = 33;
 const LEFT_EYE = 263;
 
-const SAMPLE_INTERVAL_MS = 120;
+const SAMPLE_INTERVAL_MS = 66;
 /** Keep the last angle this long after the face is lost, then ease back upright. */
 const HOLD_AFTER_LOST_MS = 3000;
 

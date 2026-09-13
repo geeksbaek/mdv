@@ -64,7 +64,7 @@ const defaultSettings = {
   syncScroll: true,
   showToc: false,
   faceTilt: false,
-  faceTiltMode: "snap" as FaceTiltMode,
+  faceTiltMode: "free" as FaceTiltMode,
   faceTiltInvert: false,
   viewMode: "split" as ViewMode,
   contentLang: "ko" as ContentLang,
@@ -95,7 +95,7 @@ export const useSettings = create<SettingsState>()(
     {
       name: "hanji-settings",
       skipHydration: true,
-      version: 4,
+      version: 5,
       // The camera needs a fresh user gesture each visit, so the toggle itself is never persisted.
       partialize: (state) => {
         const { faceTilt: _faceTilt, ...rest } = state;
@@ -104,8 +104,15 @@ export const useSettings = create<SettingsState>()(
       migrate: (persisted) => {
         const state = { ...(persisted as Record<string, unknown>) };
         state.faceTilt = false;
+        // v5: continuous rotation became the default; reset once so existing users get it.
+        if (
+          typeof persisted === "object" &&
+          persisted &&
+          (persisted as { faceTiltMode?: unknown }).faceTiltMode !== "free"
+        )
+          state.faceTiltMode = "free";
         if (state.faceTiltMode !== "snap" && state.faceTiltMode !== "free")
-          state.faceTiltMode = "snap";
+          state.faceTiltMode = "free";
         if (typeof state.faceTiltInvert !== "boolean") state.faceTiltInvert = false;
         if (!isAppLang(state.uiLang)) state.uiLang = "ko";
         if (typeof state.fontWeight !== "number") state.fontWeight = 400;

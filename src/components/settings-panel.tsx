@@ -439,8 +439,8 @@ export function SettingsPanel() {
               value={settings.faceTiltMode}
               onChange={(value) => settings.set({ faceTiltMode: value as FaceTiltMode })}
             >
-              <option value="snap">{t.faceTiltSnap}</option>
               <option value="free">{t.faceTiltFree}</option>
+              <option value="snap">{t.faceTiltSnap}</option>
             </NativeSelect>
           </Field>
           <div className="flex items-center justify-between gap-3">
