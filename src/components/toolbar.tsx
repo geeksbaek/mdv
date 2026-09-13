@@ -1,5 +1,6 @@
 import { useRef, useState, type ReactNode } from "react";
 import {
+  BookOpen,
   Columns2,
   Download,
   Eye,
@@ -72,6 +73,7 @@ export function Toolbar({ mobile }: { mobile: boolean }) {
     { id: "edit", label: t.edit, icon: PanelLeft },
     { id: "split", label: t.split, icon: Columns2 },
     { id: "preview", label: t.preview, icon: Eye },
+    { id: "book", label: t.book, icon: BookOpen },
   ];
 
   const openFile = () => fileRef.current?.click();
@@ -121,7 +123,7 @@ export function Toolbar({ mobile }: { mobile: boolean }) {
       <div className="ml-1 flex rounded-lg bg-muted p-0.5">
         {views.map((view) => {
           const Icon = view.icon;
-          if (view.id === "split") {
+          if (view.id === "split" || view.id === "book") {
             return (
               <Tip key={view.id} label={view.label}>
                 <Button
@@ -129,7 +131,7 @@ export function Toolbar({ mobile }: { mobile: boolean }) {
                   size="icon-sm"
                   aria-pressed={viewMode === view.id}
                   className={cn(
-                    "max-md:hidden",
+                    view.id === "book" ? "max-lg:hidden" : "max-md:hidden",
                     viewMode === view.id && "bg-background shadow-[var(--shadow-border)]",
                   )}
                   onClick={() => setView(view.id)}
@@ -140,7 +142,9 @@ export function Toolbar({ mobile }: { mobile: boolean }) {
               </Tip>
             );
           }
-          const active = (mobile && viewMode === "split" ? "preview" : viewMode) === view.id;
+          const active =
+            (mobile && (viewMode === "split" || viewMode === "book") ? "preview" : viewMode) ===
+            view.id;
           return (
             <Tip key={view.id} label={view.label}>
               <Button

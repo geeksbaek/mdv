@@ -1,9 +1,9 @@
-import { useEffect, useMemo, useRef, type CSSProperties, type MouseEvent, type RefObject } from "react";
+import { useEffect, useMemo, useRef, type MouseEvent, type RefObject } from "react";
 import { toast } from "sonner";
 import { containsMermaid, renderMarkdown, toggleTaskAt } from "@/lib/markdown";
-import { fontStack } from "@/lib/fonts";
+import { articleStyle } from "@/lib/article-style";
 import { messages } from "@/lib/i18n";
-import { headingFontId, useDocument, useSettings } from "@/lib/stores";
+import { useDocument, useSettings } from "@/lib/stores";
 
 type Props = {
   scrollRef: RefObject<HTMLDivElement | null>;
@@ -64,17 +64,15 @@ export function MarkdownPreview({ scrollRef, dark }: Props) {
     };
   }, [html, dark]);
 
-  const headingStack = fontStack(headingFontId(settings), settings.bodyFont);
-  const bodyStack = fontStack(settings.bodyFont, "gowun-batang");
-  const monoStack = fontStack(settings.monoFont, "system-mono");
-
   const onClick = (event: MouseEvent<HTMLDivElement>) => {
     const target = event.target as HTMLElement;
     const copyBtn = target.closest<HTMLElement>("[data-copy]");
     if (copyBtn) {
       const block = copyBtn.closest(".md-code");
       const code = block?.querySelector("pre")?.textContent ?? "";
-      void navigator.clipboard.writeText(code).then(() => toast(messages(useSettings.getState().uiLang).copiedCode));
+      void navigator.clipboard
+        .writeText(code)
+        .then(() => toast(messages(useSettings.getState().uiLang).copiedCode));
       return;
     }
     const checkbox = target.closest<HTMLInputElement>("input[data-task-index]");
@@ -92,29 +90,7 @@ export function MarkdownPreview({ scrollRef, dark }: Props) {
           ref={bodyRef}
           lang={settings.contentLang}
           className="md-body"
-          style={
-            {
-              "--md-bg": settings.colors.bg,
-              "--md-fg": settings.colors.fg,
-              "--md-muted": settings.colors.muted,
-              "--md-heading": settings.colors.heading,
-              "--md-link": settings.colors.link,
-              "--md-code-bg": settings.colors.codeBg,
-              "--md-font": bodyStack,
-              "--md-heading-font": headingStack,
-              "--md-mono": monoStack,
-              "--md-size": `${settings.fontSize}px`,
-              "--md-weight": String(settings.fontWeight),
-              "--md-heading-weight": String(settings.headingWeight),
-              "--md-leading": String(settings.lineHeight),
-              "--md-tracking": `${settings.letterSpacing}em`,
-              "--md-para-gap": `${settings.paragraphSpacing}em`,
-              "--md-width": `${settings.maxWidth}rem`,
-              "--md-word-break": settings.wordBreak,
-              "--md-line-break": settings.lineBreak,
-              "--md-hang": settings.hangingPunctuation ? "first last allow-end" : "none",
-            } as CSSProperties
-          }
+          style={articleStyle(settings)}
           dangerouslySetInnerHTML={{ __html: html }}
           onClick={onClick}
         />

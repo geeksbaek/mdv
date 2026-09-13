@@ -14,6 +14,9 @@ export type Messages = {
   edit: string;
   split: string;
   preview: string;
+  book: string;
+  bookPage: (page: number, total: number) => string;
+  bookHint: string;
   open: string;
   save: string;
   sample: string;
@@ -142,6 +145,9 @@ const ko: Messages = {
   edit: "편집",
   split: "분할",
   preview: "보기",
+  book: "책",
+  bookPage: (p, t) => `${p} / ${t}쪽`,
+  bookHint: "모서리를 끌거나 클릭해 넘기세요. 방향키와 휠도 됩니다.",
   open: "열기",
   save: "저장",
   sample: "샘플",
@@ -279,6 +285,9 @@ const ja: Messages = {
   edit: "編集",
   split: "分割",
   preview: "表示",
+  book: "本",
+  bookPage: (p, t) => `${p} / ${t}ページ`,
+  bookHint: "角をドラッグまたはクリックしてめくります。矢印キーとホイールも使えます。",
   open: "開く",
   save: "保存",
   sample: "サンプル",
@@ -416,6 +425,9 @@ const zhCN: Messages = {
   edit: "编辑",
   split: "分栏",
   preview: "预览",
+  book: "书",
+  bookPage: (p, t) => `第 ${p} / ${t} 页`,
+  bookHint: "拖动或点击页角翻页，也可使用方向键和滚轮。",
   open: "打开",
   save: "保存",
   sample: "示例",
@@ -552,6 +564,9 @@ const zhTW: Messages = {
   edit: "編輯",
   split: "分割",
   preview: "預覽",
+  book: "書",
+  bookPage: (p, t) => `第 ${p} / ${t} 頁`,
+  bookHint: "拖曳或點擊頁角翻頁，也可使用方向鍵與滾輪。",
   open: "開啟",
   save: "儲存",
   sample: "範例",
@@ -688,6 +703,9 @@ const en: Messages = {
   edit: "Edit",
   split: "Split",
   preview: "Preview",
+  book: "Book",
+  bookPage: (p, t) => `Page ${p} of ${t}`,
+  bookHint: "Drag or click a page corner to turn it. Arrow keys and the wheel work too.",
   open: "Open",
   save: "Save",
   sample: "Sample",

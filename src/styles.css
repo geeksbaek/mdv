@@ -587,3 +587,193 @@
     transition-duration: 0.01ms !important;
   }
 }
+
+/* ---------- Book mode ---------- */
+
+.md-book {
+  position: relative;
+  height: 100%;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.75rem;
+  user-select: text;
+}
+
+.md-book-spread {
+  position: relative;
+  perspective: 2600px;
+  perspective-origin: 50% 50%;
+  transform-style: preserve-3d;
+  filter: drop-shadow(0 18px 30px rgb(0 0 0 / 0.18));
+}
+
+.md-book-page {
+  position: absolute;
+  top: 0;
+  overflow: hidden;
+  background: var(--md-bg);
+  color: var(--md-fg);
+}
+
+.md-book-left {
+  left: 0;
+  border-radius: 6px 0 0 6px;
+  box-shadow: inset -14px 0 22px -18px rgb(0 0 0 / 0.45);
+}
+
+.md-book-right {
+  left: 50%;
+  border-radius: 0 6px 6px 0;
+  box-shadow: inset 14px 0 22px -18px rgb(0 0 0 / 0.45);
+}
+
+.md-book-clip {
+  position: absolute;
+  overflow: hidden;
+}
+
+.md-book-content {
+  max-width: none;
+  margin: 0;
+  column-fill: auto;
+  overflow: visible;
+}
+
+.md-book-content > *:first-child {
+  margin-top: 0;
+}
+
+.md-book-content pre,
+.md-book-content table,
+.md-book-content img,
+.md-book-content .md-math-block,
+.md-book-content .md-code {
+  break-inside: avoid;
+}
+
+.md-book-content h1,
+.md-book-content h2,
+.md-book-content h3 {
+  break-after: avoid;
+}
+
+.md-book-folio {
+  position: absolute;
+  bottom: 14px;
+  left: 0;
+  right: 0;
+  text-align: center;
+  font-size: 0.72rem;
+  letter-spacing: 0.04em;
+  color: var(--md-muted);
+  pointer-events: none;
+}
+
+.md-book-measure {
+  position: absolute;
+  left: -100000px;
+  top: 0;
+  visibility: hidden;
+  pointer-events: none;
+}
+
+.md-book-spine {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 50%;
+  width: 2px;
+  margin-left: -1px;
+  background: linear-gradient(to right, rgb(0 0 0 / 0.18), rgb(0 0 0 / 0.05));
+  pointer-events: none;
+}
+
+.md-book-leaf {
+  position: absolute;
+  top: 0;
+  transform-style: preserve-3d;
+  will-change: transform;
+  z-index: 3;
+}
+
+.md-book-leaf-right {
+  left: 50%;
+  transform-origin: left center;
+}
+
+.md-book-leaf-left {
+  left: 0;
+  transform-origin: right center;
+}
+
+.md-book-face {
+  position: absolute;
+  inset: 0;
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+  overflow: hidden;
+}
+
+/* Faces hold a page whose absolute offset is relative to the spread; undo it. */
+.md-book-face .md-book-page {
+  left: 0;
+}
+
+.md-book-face-back {
+  transform: rotateY(180deg);
+}
+
+.md-book-shade {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: linear-gradient(to right, rgb(0 0 0 / 0.55), rgb(0 0 0 / 0) 45%, rgb(0 0 0 / 0.25));
+}
+
+.md-book-cast {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 50%;
+  pointer-events: none;
+  z-index: 2;
+}
+
+.md-book-cast-right {
+  left: 50%;
+  background: linear-gradient(to right, rgb(0 0 0 / 0.5), rgb(0 0 0 / 0) 60%);
+}
+
+.md-book-cast-left {
+  left: 0;
+  background: linear-gradient(to left, rgb(0 0 0 / 0.5), rgb(0 0 0 / 0) 60%);
+}
+
+.md-book-grab {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  z-index: 4;
+  touch-action: none;
+}
+
+.md-book-grab-left {
+  left: 0;
+}
+
+.md-book-grab-right {
+  right: 0;
+}
+
+.md-book-grab:active {
+  cursor: grabbing;
+}
+
+.md-book-hint {
+  margin: 0;
+  font-size: 0.75rem;
+  color: var(--muted-foreground);
+}

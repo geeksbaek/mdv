@@ -17,6 +17,7 @@ import {
 } from "@chenglou/pretext";
 import { bandChord, screenPolygon, verticalExtent } from "@/lib/face-tilt-math";
 import { fontStack } from "@/lib/fonts";
+import { isTyping } from "@/lib/utils";
 import { extractBlocks, type TextBlockKind } from "@/lib/markdown";
 import { headingFontId, useDocument, useSettings } from "@/lib/stores";
 
@@ -359,6 +360,7 @@ export function TiltedReader({ angle }: Props) {
 
   useEffect(() => {
     const onKey = (event: KeyboardEvent) => {
+      if (isTyping(event.target)) return;
       if (event.key === "ArrowDown") scrollBy(lineHeight);
       else if (event.key === "ArrowUp") scrollBy(-lineHeight);
       else if (event.key === "PageDown" || event.key === " ") scrollBy(size.height * 0.8);

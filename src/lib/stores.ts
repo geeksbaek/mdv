@@ -6,7 +6,7 @@ import { isAppLang, type AppLang } from "@/lib/i18n";
 import { SAMPLE_DOCUMENT } from "@/lib/sample-document";
 import { DEFAULT_THEME, THEME_BY_ID, type ThemeColors } from "@/lib/themes";
 
-export type ViewMode = "edit" | "split" | "preview";
+export type ViewMode = "edit" | "split" | "preview" | "book";
 export type WordBreak = "keep-all" | "break-word" | "normal";
 export type LineBreak = "auto" | "loose" | "normal" | "strict" | "anywhere";
 export type ContentLang = "ko" | "ja" | "zh-CN" | "zh-TW" | "en";

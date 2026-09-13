@@ -6,6 +6,7 @@ import { MarkdownEditor } from "@/components/markdown-editor";
 import { MarkdownPreview } from "@/components/markdown-preview";
 import { TableOfContents } from "@/components/table-of-contents";
 import { TiltFrame } from "@/components/tilt-frame";
+import { BookView } from "@/components/book-view";
 import { Toolbar } from "@/components/toolbar";
 import { isDarkHex } from "@/lib/color";
 import { useFaceTilt } from "@/lib/face-tilt";
@@ -128,6 +129,7 @@ function useSyncScroll(
 export function Studio({ encoded }: { encoded?: string | null }) {
   useHydratedStores(encoded);
   const mobile = useMediaQuery("(max-width: 767px)");
+  const wide = useMediaQuery("(min-width: 1024px)");
   const editorRef = useRef<HTMLTextAreaElement>(null);
   const previewRef = useRef<HTMLDivElement>(null);
   const colors = useSettings((s) => s.colors);
@@ -164,9 +166,16 @@ export function Studio({ encoded }: { encoded?: string | null }) {
     document.documentElement.lang = uiLang;
   }, [uiLang]);
 
-  const resolvedView = mobile && viewMode === "split" ? "preview" : viewMode;
-  const showEditor = resolvedView !== "preview";
-  const showPreview = resolvedView !== "edit";
+  const resolvedView =
+    viewMode === "book"
+      ? wide
+        ? "book"
+        : "preview"
+      : mobile && viewMode === "split"
+        ? "preview"
+        : viewMode;
+  const showEditor = resolvedView === "edit" || resolvedView === "split";
+  const showPreview = resolvedView === "preview" || resolvedView === "split";
 
   useSyncScroll(Boolean(syncScroll && showEditor && showPreview), editorRef, previewRef);
 
@@ -205,7 +214,11 @@ export function Studio({ encoded }: { encoded?: string | null }) {
           </aside>
         ) : null}
 
-        {showEditor && showPreview ? (
+        {resolvedView === "book" ? (
+          <div className="min-h-0 min-w-0 flex-1">
+            <BookView />
+          </div>
+        ) : showEditor && showPreview ? (
           <Group orientation="horizontal" className="min-h-0 min-w-0 flex-1">
             <Panel id="editor" minSize="22%" defaultSize="46%">
               <MarkdownEditor scrollRef={editorRef} />
