@@ -86,6 +86,11 @@ export async function saveDocument(input: {
   return doc;
 }
 
+/** Store a document exactly as given (used when pulling from the account). */
+export async function putDocument(doc: SavedDocument): Promise<void> {
+  await run("readwrite", (store) => store.put(doc));
+}
+
 export async function renameDocument(id: string, name: string): Promise<void> {
   const existing = await getDocument(id);
   if (!existing) return;

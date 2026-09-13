@@ -24,17 +24,23 @@ jobs:
       - name: Deploy (Vercel builds from source)
         env:
           VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+          # Repository variables (Settings → Secrets and variables → Actions → Variables).
+          # Turn sign-in on only after DATABASE_URL, BETTER_AUTH_SECRET, BETTER_AUTH_URL
+          # and the Google/Apple client env vars are set on the Vercel project.
+          AUTH_ENABLED: ${{ vars.VITE_AUTH_ENABLED || 'false' }}
+          AUTH_PROVIDERS: ${{ vars.VITE_AUTH_PROVIDERS || '' }}
         run: |
           if [ -z "$VERCEL_TOKEN" ]; then
             echo "::error::VERCEL_TOKEN secret is not set (Settings → Secrets and variables → Actions)."
             exit 1
           fi
           # --yes links/creates the "mdv" project non-interactively on first run.
-          # Auth is off in this app (same as the workspace's .grok/app-env.json).
           npx --yes vercel@latest deploy --prod --yes \
             --token "$VERCEL_TOKEN" \
-            --build-env VITE_AUTH_ENABLED=false \
-            --env VITE_AUTH_ENABLED=false \
+            --build-env "VITE_AUTH_ENABLED=$AUTH_ENABLED" \
+            --env "VITE_AUTH_ENABLED=$AUTH_ENABLED" \
+            --build-env "VITE_AUTH_PROVIDERS=$AUTH_PROVIDERS" \
+            --env "VITE_AUTH_PROVIDERS=$AUTH_PROVIDERS" \
             | tee deploy.log
           echo "url=$(tail -n 1 deploy.log)" >> "$GITHUB_OUTPUT"
         id: vercel

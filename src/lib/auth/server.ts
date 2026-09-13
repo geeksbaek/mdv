@@ -38,7 +38,7 @@ import { Pool } from "pg";
 import { ensureDbReady, getPglite } from "../db";
 import { emailAndPasswordEnabled } from "./email-password";
 import { GATE_PROVIDER_ID, gateIdentitySessions } from "./gate-session.server";
-import { GROK_PROVIDERS } from "./providers";
+import { GROK_PROVIDERS, SOCIAL_PROVIDERS } from "./providers";
 import { pgliteDialect } from "./pglite-dialect";
 import {
   GROK_ISSUER_DEFAULT,
@@ -74,16 +74,29 @@ const env = (key: string): string | undefined => {
 // provisions auth; set it to "false" to force auth off everywhere (dev user).
 const authDisabled = env("VITE_AUTH_ENABLED") === "false";
 
+// Direct social sign-in (Google / Apple) for deployments outside the Grok
+// sandbox: the app holds its own OAuth client per provider, read from env.
+const socialCredentials = Object.fromEntries(
+  SOCIAL_PROVIDERS.map((p) => [
+    p.id,
+    { clientId: env(p.clientIdEnv), clientSecret: env(p.clientSecretEnv) },
+  ]),
+) as Record<string, { clientId?: string; clientSecret?: string }>;
+const socialConfigured = Object.values(socialCredentials).some((c) => c.clientId && c.clientSecret);
+
 // Broker federation creds: the deployer injects a per-app client when deployed;
 // otherwise fall back to the shared live-preview client, which the broker accepts
-// for any `*.grok-sandbox.com` callback (see `./preview`).
+// for any `*.grok-sandbox.com` callback (see `./preview`). Outside the sandbox
+// the broker is only used when its client is set explicitly.
 const grokIssuer = env("GROK_AUTH_ISSUER") ?? GROK_ISSUER_DEFAULT;
-const grokClientId = env("GROK_AUTH_CLIENT_ID") ?? PREVIEW_CLIENT_ID;
-const grokClientSecret = env("GROK_AUTH_CLIENT_SECRET") ?? PREVIEW_CLIENT_SECRET;
+const grokClientId =
+  env("GROK_AUTH_CLIENT_ID") ?? (socialConfigured ? undefined : PREVIEW_CLIENT_ID);
+const grokClientSecret =
+  env("GROK_AUTH_CLIENT_SECRET") ?? (socialConfigured ? undefined : PREVIEW_CLIENT_SECRET);
+const grokConfigured = !authDisabled && Boolean(grokClientId && grokClientSecret);
 
-/** True when federated sign-in is active (real auth is enforced). */
-export const authConfigured =
-  !authDisabled && Boolean(grokClientId && grokClientSecret);
+/** True when sign-in is active (real auth is enforced). */
+export const authConfigured = !authDisabled && (grokConfigured || socialConfigured);
 
 // This app's own Better Auth origin. When deployed the deployer injects the
 // public URL. In the sandbox live preview there's no fixed URL (each preview gets
@@ -150,7 +163,7 @@ export const SESSION_TOKEN_COOKIE = "__Host-grok-auth.session_token";
 
 // Built separately so the `betterAuth({...})` call stays easy to edit without
 // breaking brackets (models often trip on the conditional plugin spread).
-const grokOAuthPlugin = authConfigured
+const grokOAuthPlugin = grokConfigured
   ? genericOAuth({
       config: GROK_PROVIDERS.map(({ providerId, idp }) => ({
         providerId,
@@ -196,12 +209,37 @@ export const auth = betterAuth({
       enabled: true,
       trustedProviders: [
         ...GROK_PROVIDERS.map((p) => p.providerId),
+        ...SOCIAL_PROVIDERS.map((p) => p.id),
         GATE_PROVIDER_ID,
       ],
       // X's synthetic email is never "verified", so don't gate linking on the
       // local user's email-verified state.
       requireLocalEmailVerified: false,
     },
+  },
+
+  // Google / Apple, each enabled only when both halves of its client are set.
+  socialProviders: {
+    ...(socialCredentials.google?.clientId && socialCredentials.google.clientSecret
+      ? {
+          google: {
+            clientId: socialCredentials.google.clientId,
+            clientSecret: socialCredentials.google.clientSecret,
+            prompt: "select_account" as const,
+          },
+        }
+      : {}),
+    ...(socialCredentials.apple?.clientId && socialCredentials.apple.clientSecret
+      ? {
+          apple: {
+            clientId: socialCredentials.apple.clientId,
+            clientSecret: socialCredentials.apple.clientSecret,
+            ...(env("APPLE_APP_BUNDLE_IDENTIFIER")
+              ? { appBundleIdentifier: env("APPLE_APP_BUNDLE_IDENTIFIER") }
+              : {}),
+          },
+        }
+      : {}),
   },
 
   // Cache the session in the short-lived signed `session_data` cookie so reads

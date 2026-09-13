@@ -97,6 +97,15 @@ export type Messages = {
   libraryUnsaved: string;
   libraryUnavailable: string;
   libraryChars: (n: number) => string;
+  accountSection: string;
+  accountSignInHint: string;
+  accountSignInWith: (provider: string) => string;
+  accountSignOut: string;
+  accountSyncNow: string;
+  accountSyncing: string;
+  accountSynced: (pushed: number, pulled: number) => string;
+  accountSyncError: string;
+  accountSignInFailed: string;
   faceTilt: string;
   faceTiltHint: string;
   faceTiltPrivacy: string;
@@ -228,6 +237,15 @@ const ko: Messages = {
   libraryUnsaved: "저장하지 않은 변경이 있습니다. 그래도 다른 문서를 열까요?",
   libraryUnavailable: "이 브라우저에서는 저장소를 쓸 수 없습니다.",
   libraryChars: (n) => `${n.toLocaleString("ko")}자`,
+  accountSection: "계정 동기화",
+  accountSignInHint: "로그인하면 저장된 문서가 계정에 묶여 다른 기기에서도 열립니다.",
+  accountSignInWith: (p) => `${p}로 로그인`,
+  accountSignOut: "로그아웃",
+  accountSyncNow: "지금 동기화",
+  accountSyncing: "동기화 중…",
+  accountSynced: (a, b) => `동기화 완료 · 올림 ${a}, 내려받음 ${b}`,
+  accountSyncError: "동기화에 실패했습니다. 잠시 후 다시 시도하세요.",
+  accountSignInFailed: "로그인을 시작하지 못했습니다.",
   faceTilt: "얼굴 따라 회전",
   faceTiltHint:
     "전면 카메라로 얼굴 기울기를 읽어 글을 눈높이에 맞춥니다. 누워서 읽을 때 유용합니다.",
@@ -368,6 +386,15 @@ const ja: Messages = {
   libraryUnsaved: "保存していない変更があります。別の文書を開きますか？",
   libraryUnavailable: "このブラウザではストレージを使用できません。",
   libraryChars: (n) => `${n.toLocaleString("ja")}文字`,
+  accountSection: "アカウント同期",
+  accountSignInHint: "ログインすると保存した文書がアカウントに紐づき、他の端末でも開けます。",
+  accountSignInWith: (p) => `${p} でログイン`,
+  accountSignOut: "ログアウト",
+  accountSyncNow: "今すぐ同期",
+  accountSyncing: "同期中…",
+  accountSynced: (a, b) => `同期完了 · 送信 ${a}、受信 ${b}`,
+  accountSyncError: "同期に失敗しました。しばらくしてからやり直してください。",
+  accountSignInFailed: "ログインを開始できませんでした。",
   faceTilt: "顔に合わせて回転",
   faceTiltHint:
     "前面カメラで顔の傾きを読み取り、文章を目線に合わせます。寝転んで読むときに便利です。",
@@ -508,6 +535,15 @@ const zhCN: Messages = {
   libraryUnsaved: "有未保存的更改。仍要打开其他文档吗？",
   libraryUnavailable: "此浏览器无法使用存储。",
   libraryChars: (n) => `${n.toLocaleString("zh-CN")} 字`,
+  accountSection: "账户同步",
+  accountSignInHint: "登录后，已保存的文档会绑定到账户，可在其他设备打开。",
+  accountSignInWith: (p) => `使用 ${p} 登录`,
+  accountSignOut: "退出登录",
+  accountSyncNow: "立即同步",
+  accountSyncing: "正在同步…",
+  accountSynced: (a, b) => `同步完成 · 上传 ${a}，下载 ${b}`,
+  accountSyncError: "同步失败，请稍后重试。",
+  accountSignInFailed: "无法开始登录。",
   faceTilt: "跟随面部旋转",
   faceTiltHint: "通过前置摄像头读取面部倾斜，让文字与视线对齐。躺着阅读时很有用。",
   faceTiltPrivacy: "画面仅在设备内处理，不会发送到任何地方。",
@@ -647,6 +683,15 @@ const zhTW: Messages = {
   libraryUnsaved: "有未儲存的變更。仍要開啟其他文件嗎？",
   libraryUnavailable: "此瀏覽器無法使用儲存空間。",
   libraryChars: (n) => `${n.toLocaleString("zh-TW")} 字`,
+  accountSection: "帳戶同步",
+  accountSignInHint: "登入後，已儲存的文件會綁定到帳戶，可在其他裝置開啟。",
+  accountSignInWith: (p) => `使用 ${p} 登入`,
+  accountSignOut: "登出",
+  accountSyncNow: "立即同步",
+  accountSyncing: "同步中…",
+  accountSynced: (a, b) => `同步完成 · 上傳 ${a}，下載 ${b}`,
+  accountSyncError: "同步失敗，請稍後再試。",
+  accountSignInFailed: "無法開始登入。",
   faceTilt: "跟隨臉部旋轉",
   faceTiltHint: "透過前鏡頭讀取臉部傾斜，讓文字與視線對齊。躺著閱讀時很實用。",
   faceTiltPrivacy: "影像僅在裝置內處理，不會傳送到任何地方。",
@@ -786,6 +831,16 @@ const en: Messages = {
   libraryUnsaved: "You have unsaved changes. Open another document anyway?",
   libraryUnavailable: "Storage is not available in this browser.",
   libraryChars: (n) => `${n.toLocaleString("en")} chars`,
+  accountSection: "Account sync",
+  accountSignInHint:
+    "Sign in to tie saved documents to your account and open them on other devices.",
+  accountSignInWith: (p) => `Sign in with ${p}`,
+  accountSignOut: "Sign out",
+  accountSyncNow: "Sync now",
+  accountSyncing: "Syncing…",
+  accountSynced: (a, b) => `Synced · uploaded ${a}, downloaded ${b}`,
+  accountSyncError: "Sync failed. Try again in a moment.",
+  accountSignInFailed: "Could not start sign-in.",
   faceTilt: "Follow your face",
   faceTiltHint:
     "Reads your head tilt with the front camera and keeps the text level with your eyes. Handy when reading lying down.",

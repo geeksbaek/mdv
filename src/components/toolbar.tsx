@@ -51,7 +51,14 @@ function Tip({ label, children }: { label: string; children: ReactNode }) {
 export function Toolbar({ mobile }: { mobile: boolean }) {
   const fileRef = useRef<HTMLInputElement>(null);
   const [shareOpen, setShareOpen] = useState(false);
-  const [libraryOpen, setLibraryOpen] = useState(false);
+  const [libraryOpen, setLibraryOpen] = useState(() => {
+    if (typeof window === "undefined") return false;
+    const url = new URL(window.location.href);
+    if (!url.searchParams.has("library")) return false;
+    url.searchParams.delete("library");
+    window.history.replaceState(null, "", url.toString());
+    return true;
+  });
   const dirty = useDocument((s) => s.dirty);
   const libraryId = useDocument((s) => s.libraryId);
   const t = messages(useSettings((s) => s.uiLang));

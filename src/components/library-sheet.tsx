@@ -13,7 +13,10 @@ import {
   SheetHeader,
   SheetTitle,
 } from "@/components/ui/sheet";
+import { SOCIAL_SIGN_IN, authEnabled, signInSocial, signOut } from "@/lib/auth/client";
+import { useCurrentUserState } from "@/lib/auth/use-current-user";
 import { messages } from "@/lib/i18n";
+import { deleteRemote, syncLibrary, useSyncState } from "@/lib/sync";
 import {
   deleteDocument,
   getDocument,
@@ -40,6 +43,9 @@ export function LibrarySheet({ open, onOpenChange }: Props) {
   const [docs, setDocs] = useState<SavedDocumentSummary[] | null>(null);
   const [unavailable, setUnavailable] = useState(false);
   const [busy, setBusy] = useState(false);
+  const { user, isPending } = useCurrentUserState();
+  const signedIn = authEnabled && Boolean(user) && !user?.isDevFallback;
+  const sync = useSyncState();
 
   const refresh = useCallback(async () => {
     try {
@@ -57,6 +63,12 @@ export function LibrarySheet({ open, onOpenChange }: Props) {
     void refresh();
   }, [open, fileName, refresh]);
 
+  // Signed in: reconcile with the account whenever the sheet opens.
+  useEffect(() => {
+    if (!open || !signedIn) return;
+    void syncLibrary().then(refresh);
+  }, [open, signedIn, refresh]);
+
   const save = async (asNew: boolean) => {
     setBusy(true);
     try {
@@ -68,6 +80,7 @@ export function LibrarySheet({ open, onOpenChange }: Props) {
       useDocument.getState().markSaved(saved.id, saved.name);
       toast(t.librarySaved(saved.name));
       await refresh();
+      if (signedIn) void syncLibrary().then(refresh);
     } catch {
       toast.error(t.libraryUnavailable);
     } finally {
@@ -94,7 +107,25 @@ export function LibrarySheet({ open, onOpenChange }: Props) {
     await deleteDocument(summary.id);
     if (libraryId === summary.id) useDocument.setState({ libraryId: null, dirty: true });
     await refresh();
+    if (signedIn) void deleteRemote(summary.id);
   };
+
+  const startSignIn = async (provider: (typeof SOCIAL_SIGN_IN)[number]["id"]) => {
+    try {
+      await signInSocial(provider, { callbackURL: "/?library=1" });
+    } catch {
+      toast.error(t.accountSignInFailed);
+    }
+  };
+
+  const syncLine =
+    sync.status === "syncing"
+      ? t.accountSyncing
+      : sync.status === "error"
+        ? t.accountSyncError
+        : sync.status === "done"
+          ? t.accountSynced(sync.pushed, sync.pulled)
+          : null;
 
   const formatDate = (ts: number) =>
     new Intl.DateTimeFormat(uiLang, { dateStyle: "medium", timeStyle: "short" }).format(
@@ -143,6 +174,80 @@ export function LibrarySheet({ open, onOpenChange }: Props) {
                 <p className="text-xs text-destructive">{t.libraryUnavailable}</p>
               ) : null}
             </section>
+
+            {authEnabled ? (
+              <>
+                <Separator />
+                <section className="grid gap-3">
+                  <Label className="text-muted-foreground">{t.accountSection}</Label>
+                  {isPending ? null : signedIn && user ? (
+                    <div className="grid gap-2">
+                      <div className="flex items-center gap-2">
+                        {user.profileImageUrl ? (
+                          <img
+                            src={user.profileImageUrl}
+                            alt=""
+                            className="size-8 rounded-full object-cover"
+                          />
+                        ) : (
+                          <span className="grid size-8 place-items-center rounded-full bg-muted text-sm font-medium">
+                            {(user.displayName ?? user.primaryEmail ?? "?").charAt(0).toUpperCase()}
+                          </span>
+                        )}
+                        <div className="min-w-0 flex-1">
+                          <p className="truncate text-sm">
+                            {user.displayName ?? user.primaryEmail}
+                          </p>
+                          {user.displayName && user.primaryEmail ? (
+                            <p className="truncate text-xs text-muted-foreground">
+                              {user.primaryEmail}
+                            </p>
+                          ) : null}
+                        </div>
+                      </div>
+                      <div className="flex flex-wrap gap-2">
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          disabled={sync.status === "syncing"}
+                          onClick={() => void syncLibrary().then(refresh)}
+                        >
+                          {t.accountSyncNow}
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => void signOut("/").catch(() => undefined)}
+                        >
+                          {t.accountSignOut}
+                        </Button>
+                      </div>
+                      {syncLine ? (
+                        <p className="text-xs text-muted-foreground" aria-live="polite">
+                          {syncLine}
+                        </p>
+                      ) : null}
+                    </div>
+                  ) : (
+                    <div className="grid gap-2">
+                      <p className="text-xs text-muted-foreground">{t.accountSignInHint}</p>
+                      <div className="flex flex-wrap gap-2">
+                        {SOCIAL_SIGN_IN.map((p) => (
+                          <Button
+                            key={p.id}
+                            variant="outline"
+                            size="sm"
+                            onClick={() => void startSignIn(p.id)}
+                          >
+                            {t.accountSignInWith(p.label)}
+                          </Button>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                </section>
+              </>
+            ) : null}
 
             <Separator />
 

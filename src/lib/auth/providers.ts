@@ -29,3 +29,39 @@ export const GROK_PROVIDERS: readonly GrokProvider[] = [
   { providerId: "grok-google", idp: "google", label: "Google" },
   { providerId: "grok-x", idp: "twitter", label: "X" },
 ];
+
+/** Direct social providers (no broker). Credentials come from the named env vars. */
+export type SocialProvider = {
+  id: "google" | "apple";
+  label: string;
+  clientIdEnv: string;
+  clientSecretEnv: string;
+};
+
+export const SOCIAL_PROVIDERS: readonly SocialProvider[] = [
+  {
+    id: "google",
+    label: "Google",
+    clientIdEnv: "GOOGLE_CLIENT_ID",
+    clientSecretEnv: "GOOGLE_CLIENT_SECRET",
+  },
+  {
+    id: "apple",
+    label: "Apple",
+    clientIdEnv: "APPLE_CLIENT_ID",
+    clientSecretEnv: "APPLE_CLIENT_SECRET",
+  },
+];
+
+/**
+ * Providers to show buttons for on the client. Build-time `VITE_AUTH_PROVIDERS`
+ * (comma-separated ids) narrows the list; unset means all of them.
+ */
+export function clientSocialProviders(raw: string | undefined): readonly SocialProvider[] {
+  const ids = (raw ?? "")
+    .split(",")
+    .map((s) => s.trim())
+    .filter(Boolean);
+  if (ids.length === 0) return SOCIAL_PROVIDERS;
+  return SOCIAL_PROVIDERS.filter((p) => ids.includes(p.id));
+}
