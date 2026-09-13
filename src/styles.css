@@ -714,6 +714,27 @@
   overflow: visible;
 }
 
+/* WebKit only — every iPad browser and Safari; `font: -apple-system-body`
+   parses nowhere else. Its multicol layout paints the block ahead of a
+   break-inside: avoid element into both columns when that element is pushed
+   to the next one, so the paragraph before a code block repeats on facing
+   pages. A block split across two pages is the lesser harm there. */
+@supports (font: -apple-system-body) {
+  .md-book-content pre,
+  .md-book-content table,
+  .md-book-content img,
+  .md-book-content .md-math-block,
+  .md-book-content .md-code {
+    break-inside: auto;
+  }
+
+  .md-book-content h1,
+  .md-book-content h2,
+  .md-book-content h3 {
+    break-after: auto;
+  }
+}
+
 .md-book-content pre {
   white-space: pre-wrap;
 }
