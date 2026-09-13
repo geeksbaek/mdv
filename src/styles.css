@@ -795,3 +795,40 @@
   font-size: 0.75rem;
   color: var(--muted-foreground);
 }
+
+.md-book-style-toggle {
+  background: none;
+  border: 0;
+  padding: 0;
+  font: inherit;
+  color: inherit;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  cursor: pointer;
+}
+
+/* Plain style: the same pages and turning, with no book chrome at all. */
+.md-book-plain .md-book-spread {
+  filter: none;
+}
+
+.md-book-plain .md-book-page {
+  background: transparent;
+  border-radius: 0;
+  box-shadow: none;
+}
+
+.md-book-plain .md-book-leaf .md-book-page,
+.md-book-plain .md-book-face {
+  background: var(--md-bg);
+}
+
+.md-book-plain .md-book-spine,
+.md-book-plain .md-book-edge,
+.md-book-plain .md-book-cast {
+  display: none;
+}
+
+.md-book-plain .md-book-shade {
+  background: linear-gradient(to right, rgb(0 0 0 / 0.18), rgb(0 0 0 / 0) 50%);
+}

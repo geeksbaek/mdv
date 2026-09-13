@@ -7,6 +7,7 @@ import { SAMPLE_DOCUMENT } from "@/lib/sample-document";
 import { DEFAULT_THEME, THEME_BY_ID, type ThemeColors } from "@/lib/themes";
 
 export type ViewMode = "edit" | "split" | "preview" | "book";
+export type BookStyle = "book" | "plain";
 export type WordBreak = "keep-all" | "break-word" | "normal";
 export type LineBreak = "auto" | "loose" | "normal" | "strict" | "anywhere";
 export type ContentLang = "ko" | "ja" | "zh-CN" | "zh-TW" | "en";
@@ -31,6 +32,7 @@ export type SettingsState = {
   softBreaks: boolean;
   syncScroll: boolean;
   showToc: boolean;
+  bookStyle: BookStyle;
   faceTilt: boolean;
   faceTiltMode: FaceTiltMode;
   faceTiltInvert: boolean;
@@ -63,6 +65,7 @@ const defaultSettings = {
   softBreaks: false,
   syncScroll: true,
   showToc: false,
+  bookStyle: "book" as BookStyle,
   faceTilt: false,
   faceTiltMode: "free" as FaceTiltMode,
   faceTiltInvert: false,
@@ -104,6 +107,7 @@ export const useSettings = create<SettingsState>()(
       migrate: (persisted) => {
         const state = { ...(persisted as Record<string, unknown>) };
         state.faceTilt = false;
+        if (state.bookStyle !== "book" && state.bookStyle !== "plain") state.bookStyle = "book";
         // v5: continuous rotation became the default; reset once so existing users get it.
         if (
           typeof persisted === "object" &&

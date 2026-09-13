@@ -332,7 +332,11 @@ export function BookView() {
   };
 
   return (
-    <div ref={hostRef} className="md-book" style={{ background: settings.colors.bg }}>
+    <div
+      ref={hostRef}
+      className={`md-book ${settings.bookStyle === "plain" ? "md-book-plain" : ""}`}
+      style={{ background: settings.colors.bg }}
+    >
       <div
         className="md-book-spread"
         style={spreadStyle}
@@ -438,7 +442,18 @@ export function BookView() {
           aria-hidden
         />
       </div>
-      <p className="md-book-hint">{t.bookHint}</p>
+      <p className="md-book-hint">
+        {t.bookHint}{" "}
+        <button
+          type="button"
+          className="md-book-style-toggle"
+          onClick={() =>
+            settings.set({ bookStyle: settings.bookStyle === "plain" ? "book" : "plain" })
+          }
+        >
+          {settings.bookStyle === "plain" ? t.bookStyleBook : t.bookStylePlain}
+        </button>
+      </p>
 
       {/* Hidden copy used only to count how many columns the article needs. */}
       <article

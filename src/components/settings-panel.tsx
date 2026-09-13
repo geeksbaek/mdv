@@ -7,6 +7,7 @@ import { THEME_PRESETS } from "@/lib/themes";
 import {
   headingFontId,
   useSettings,
+  type BookStyle,
   type ContentLang,
   type LineBreak,
   type WordBreak,
@@ -408,6 +409,22 @@ export function SettingsPanel() {
               onCheckedChange={(checked) => settings.set({ showToc: checked })}
             />
           </div>
+        </section>
+
+        <Separator />
+
+        <section className="grid gap-3">
+          <h3 className="text-sm font-medium">{t.bookSection}</h3>
+          <Field label={t.bookStyle}>
+            <NativeSelect
+              value={settings.bookStyle}
+              onChange={(value) => settings.set({ bookStyle: value as BookStyle })}
+            >
+              <option value="book">{t.bookStyleBook}</option>
+              <option value="plain">{t.bookStylePlain}</option>
+            </NativeSelect>
+          </Field>
+          <p className="text-xs text-muted-foreground">{t.bookStyleHint}</p>
         </section>
 
         <Separator />

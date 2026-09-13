@@ -17,6 +17,11 @@ export type Messages = {
   book: string;
   bookPage: (page: number, total: number) => string;
   bookHint: string;
+  bookSection: string;
+  bookStyle: string;
+  bookStyleBook: string;
+  bookStylePlain: string;
+  bookStyleHint: string;
   bookEdgeRead: (n: number) => string;
   bookEdgeRemaining: (n: number) => string;
   open: string;
@@ -159,6 +164,11 @@ const ko: Messages = {
   book: "책",
   bookPage: (p, t) => `${p} / ${t}쪽`,
   bookHint: "모서리를 끌거나 클릭해 넘기세요. 터치 화면에서는 쓸어넘기고, 방향키와 휠도 됩니다.",
+  bookSection: "책 보기",
+  bookStyle: "책 형상",
+  bookStyleBook: "책 모양",
+  bookStylePlain: "민무늬",
+  bookStyleHint: "민무늬는 종이 그림자, 책등, 책배 더미 없이 글만 두고 같은 방식으로 넘깁니다.",
   bookEdgeRead: (n) => `읽은 ${n}쪽`,
   bookEdgeRemaining: (n) => `남은 ${n}쪽`,
   open: "열기",
@@ -311,6 +321,11 @@ const ja: Messages = {
   bookPage: (p, t) => `${p} / ${t}ページ`,
   bookHint:
     "角をドラッグまたはクリックしてめくります。タッチ画面ではスワイプ、矢印キーとホイールも使えます。",
+  bookSection: "本の表示",
+  bookStyle: "本の形",
+  bookStyleBook: "本らしく",
+  bookStylePlain: "プレーン",
+  bookStyleHint: "プレーンは紙の影・背表紙・小口の束を消し、文字だけでめくります。",
   bookEdgeRead: (n) => `読了 ${n}ページ`,
   bookEdgeRemaining: (n) => `残り ${n}ページ`,
   open: "開く",
@@ -462,6 +477,11 @@ const zhCN: Messages = {
   book: "书",
   bookPage: (p, t) => `第 ${p} / ${t} 页`,
   bookHint: "拖动或点击页角翻页；触屏可滑动，也可使用方向键和滚轮。",
+  bookSection: "书本视图",
+  bookStyle: "书本外观",
+  bookStyleBook: "书本样式",
+  bookStylePlain: "素面",
+  bookStyleHint: "素面去掉纸张阴影、书脊和书口页堆，只保留文字并以同样方式翻页。",
   bookEdgeRead: (n) => `已读 ${n} 页`,
   bookEdgeRemaining: (n) => `剩余 ${n} 页`,
   open: "打开",
@@ -612,6 +632,11 @@ const zhTW: Messages = {
   book: "書",
   bookPage: (p, t) => `第 ${p} / ${t} 頁`,
   bookHint: "拖曳或點擊頁角翻頁；觸控螢幕可滑動，也可使用方向鍵與滾輪。",
+  bookSection: "書本檢視",
+  bookStyle: "書本外觀",
+  bookStyleBook: "書本樣式",
+  bookStylePlain: "素面",
+  bookStyleHint: "素面去掉紙張陰影、書脊與書口頁堆，只保留文字並以同樣方式翻頁。",
   bookEdgeRead: (n) => `已讀 ${n} 頁`,
   bookEdgeRemaining: (n) => `剩餘 ${n} 頁`,
   open: "開啟",
@@ -763,6 +788,12 @@ const en: Messages = {
   bookPage: (p, t) => `Page ${p} of ${t}`,
   bookHint:
     "Drag or click a page corner to turn it. Swipe on touch screens; arrow keys and the wheel work too.",
+  bookSection: "Book view",
+  bookStyle: "Book look",
+  bookStyleBook: "Book",
+  bookStylePlain: "Plain",
+  bookStyleHint:
+    "Plain removes the paper shadows, spine and page piles, leaving just the text with the same page turning.",
   bookEdgeRead: (n) => `${n} pages read`,
   bookEdgeRemaining: (n) => `${n} pages left`,
   open: "Open",
