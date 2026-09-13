@@ -8,10 +8,12 @@ import {
   PanelLeft,
   Printer,
   RotateCcw,
+  ScanFace,
   Settings2,
   Share2,
 } from "lucide-react";
 import { toast } from "sonner";
+import { useFaceTiltRuntime } from "@/lib/face-tilt";
 import { messages } from "@/lib/i18n";
 import { SAMPLE_DOCUMENT } from "@/lib/sample-document";
 import { useDocument, useSettings, type ViewMode } from "@/lib/stores";
@@ -22,7 +24,14 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
+import {
+  Sheet,
+  SheetContent,
+  SheetDescription,
+  SheetHeader,
+  SheetTitle,
+  SheetTrigger,
+} from "@/components/ui/sheet";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { SettingsPanel } from "@/components/settings-panel";
 import { ShareDialog } from "@/components/share-dialog";
@@ -46,6 +55,14 @@ export function Toolbar({ mobile }: { mobile: boolean }) {
   const cjkFriendly = useSettings((s) => s.cjkFriendly);
   const fileName = useDocument((s) => s.fileName);
   const markdown = useDocument((s) => s.markdown);
+  const faceTilt = useSettings((s) => s.faceTilt);
+  const tiltStatus = useFaceTiltRuntime((s) => s.status);
+  const toggleFaceTilt = () => {
+    const next = !faceTilt;
+    useSettings
+      .getState()
+      .set(next ? { faceTilt: true, viewMode: "preview" } : { faceTilt: false });
+  };
 
   const views: Array<{ id: ViewMode; label: string; icon: typeof PanelLeft }> = [
     { id: "edit", label: t.edit, icon: PanelLeft },
@@ -109,7 +126,10 @@ export function Toolbar({ mobile }: { mobile: boolean }) {
                   variant="ghost"
                   size="icon-sm"
                   aria-pressed={viewMode === view.id}
-                  className={cn("max-md:hidden", viewMode === view.id && "bg-background shadow-[var(--shadow-border)]")}
+                  className={cn(
+                    "max-md:hidden",
+                    viewMode === view.id && "bg-background shadow-[var(--shadow-border)]",
+                  )}
                   onClick={() => setView(view.id)}
                 >
                   <Icon />
@@ -172,6 +192,22 @@ export function Toolbar({ mobile }: { mobile: boolean }) {
             </Button>
           </Tip>
         </div>
+
+        <Tip label={t.faceTilt}>
+          <Button
+            variant="ghost"
+            size="icon-sm"
+            aria-pressed={faceTilt}
+            className={cn(
+              faceTilt && "bg-secondary text-secondary-foreground",
+              tiltStatus === "loading" && "animate-pulse",
+            )}
+            onClick={toggleFaceTilt}
+          >
+            <ScanFace />
+            <span className="sr-only">{t.faceTilt}</span>
+          </Button>
+        </Tip>
 
         <Tip label={t.share}>
           <Button variant="ghost" size="icon-sm" onClick={() => setShareOpen(true)}>

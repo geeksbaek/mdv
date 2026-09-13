@@ -5,15 +5,13 @@ import { FontLoader } from "@/components/font-loader";
 import { MarkdownEditor } from "@/components/markdown-editor";
 import { MarkdownPreview } from "@/components/markdown-preview";
 import { TableOfContents } from "@/components/table-of-contents";
+import { TiltFrame } from "@/components/tilt-frame";
 import { Toolbar } from "@/components/toolbar";
 import { isDarkHex } from "@/lib/color";
+import { useFaceTilt } from "@/lib/face-tilt";
 import { fontStack } from "@/lib/fonts";
 import { pageTitle, renderMarkdown } from "@/lib/markdown";
-import {
-  decodeSharePayload,
-  readEncodedFromLocation,
-  stripShareFromUrl,
-} from "@/lib/share";
+import { decodeSharePayload, readEncodedFromLocation, stripShareFromUrl } from "@/lib/share";
 import { messages } from "@/lib/i18n";
 import { headingFontId, useDocument, useSettings } from "@/lib/stores";
 
@@ -143,10 +141,24 @@ export function Studio({ encoded }: { encoded?: string | null }) {
   const bodyFont = useSettings((s) => s.bodyFont);
   const headingFont = useSettings((s) => s.headingFont);
   const monoFont = useSettings((s) => s.monoFont);
+  const faceTilt = useSettings((s) => s.faceTilt);
+  const faceTiltMode = useSettings((s) => s.faceTiltMode);
+  const faceTiltInvert = useSettings((s) => s.faceTiltInvert);
+  const tilt = useFaceTilt({ enabled: faceTilt, mode: faceTiltMode, invert: faceTiltInvert });
 
   useEffect(() => {
     applyShellTheme(colors);
   }, [colors]);
+
+  useEffect(() => {
+    if (!faceTilt) return;
+    const t = messages(useSettings.getState().uiLang);
+    if (tilt.status === "denied") toast.error(t.faceTiltDenied);
+    else if (tilt.status === "unsupported") toast.error(t.faceTiltUnsupported);
+    else if (tilt.status === "error") toast.error(t.faceTiltError);
+    else return;
+    useSettings.getState().set({ faceTilt: false });
+  }, [faceTilt, tilt.status]);
 
   useEffect(() => {
     document.documentElement.lang = uiLang;
@@ -209,7 +221,9 @@ export function Studio({ encoded }: { encoded?: string | null }) {
           </div>
         ) : (
           <div className="min-h-0 min-w-0 flex-1">
-            <MarkdownPreview scrollRef={previewRef} dark={isDarkHex(colors.bg)} />
+            <TiltFrame angle={tilt.angle} active={faceTilt && tilt.status !== "off"}>
+              <MarkdownPreview scrollRef={previewRef} dark={isDarkHex(colors.bg)} />
+            </TiltFrame>
           </div>
         )}
       </div>

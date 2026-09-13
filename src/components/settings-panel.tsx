@@ -2,6 +2,7 @@ import type { ReactNode } from "react";
 import { BODY_FONTS, FONT_BY_ID, MONO_FONTS, fontStack } from "@/lib/fonts";
 import { APP_LANGS, isAppLang, messages, weightName } from "@/lib/i18n";
 import { normalizeHex } from "@/lib/color";
+import { useFaceTiltRuntime, type FaceTiltMode } from "@/lib/face-tilt";
 import { THEME_PRESETS } from "@/lib/themes";
 import {
   headingFontId,
@@ -19,20 +20,14 @@ import { Slider } from "@/components/ui/slider";
 import { Switch } from "@/components/ui/switch";
 import { cn } from "@/lib/utils";
 
-function Field({
-  label,
-  value,
-  children,
-}: {
-  label: string;
-  value?: string;
-  children: ReactNode;
-}) {
+function Field({ label, value, children }: { label: string; value?: string; children: ReactNode }) {
   return (
     <div className="grid gap-2">
       <div className="flex items-baseline justify-between gap-3">
         <Label className="text-muted-foreground">{label}</Label>
-        {value ? <span className="font-mono text-xs tabular-nums text-muted-foreground">{value}</span> : null}
+        {value ? (
+          <span className="font-mono text-xs tabular-nums text-muted-foreground">{value}</span>
+        ) : null}
       </div>
       {children}
     </div>
@@ -94,6 +89,15 @@ export function SettingsPanel() {
   const t = messages(settings.uiLang);
   const headingId = headingFontId(settings);
   const previewStack = fontStack(settings.bodyFont, "gowun-batang");
+  const tiltStatus = useFaceTiltRuntime((s) => s.status);
+  const tiltStatusText =
+    tiltStatus === "loading"
+      ? t.faceTiltLoading
+      : tiltStatus === "tracking"
+        ? t.faceTiltTracking
+        : tiltStatus === "lost"
+          ? t.faceTiltLost
+          : null;
 
   return (
     <ScrollArea className="min-h-0 flex-1">
@@ -124,7 +128,10 @@ export function SettingsPanel() {
           <div className="grid grid-cols-2 gap-2">
             {THEME_PRESETS.map((theme) => {
               const active = settings.preset === theme.id;
-              const copy = t.themes[theme.id] ?? { name: theme.name, description: theme.description };
+              const copy = t.themes[theme.id] ?? {
+                name: theme.name,
+                description: theme.description,
+              };
               return (
                 <button
                   key={theme.id}
@@ -149,7 +156,10 @@ export function SettingsPanel() {
         <section className="grid gap-4">
           <h3 className="text-sm font-medium">{t.fonts}</h3>
           <Field label={t.body}>
-            <NativeSelect value={settings.bodyFont} onChange={(id) => settings.set({ bodyFont: id })}>
+            <NativeSelect
+              value={settings.bodyFont}
+              onChange={(id) => settings.set({ bodyFont: id })}
+            >
               {BODY_FONTS.map((font) => (
                 <option key={font.id} value={font.id}>
                   {font.name}
@@ -171,7 +181,10 @@ export function SettingsPanel() {
             </NativeSelect>
           </Field>
           <Field label={t.code}>
-            <NativeSelect value={settings.monoFont} onChange={(id) => settings.set({ monoFont: id })}>
+            <NativeSelect
+              value={settings.monoFont}
+              onChange={(id) => settings.set({ monoFont: id })}
+            >
               {MONO_FONTS.map((font) => (
                 <option key={font.id} value={font.id}>
                   {font.name}
@@ -319,8 +332,16 @@ export function SettingsPanel() {
 
         <section className="grid gap-3">
           <h3 className="text-sm font-medium">{t.colors}</h3>
-          <ColorField label={t.colorBg} value={settings.colors.bg} onChange={(bg) => settings.setColors({ bg })} />
-          <ColorField label={t.colorFg} value={settings.colors.fg} onChange={(fg) => settings.setColors({ fg })} />
+          <ColorField
+            label={t.colorBg}
+            value={settings.colors.bg}
+            onChange={(bg) => settings.setColors({ bg })}
+          />
+          <ColorField
+            label={t.colorFg}
+            value={settings.colors.fg}
+            onChange={(fg) => settings.setColors({ fg })}
+          />
           <ColorField
             label={t.colorHeading}
             value={settings.colors.heading}
@@ -331,7 +352,11 @@ export function SettingsPanel() {
             value={settings.colors.muted}
             onChange={(muted) => settings.setColors({ muted })}
           />
-          <ColorField label={t.colorLink} value={settings.colors.link} onChange={(link) => settings.setColors({ link })} />
+          <ColorField
+            label={t.colorLink}
+            value={settings.colors.link}
+            onChange={(link) => settings.setColors({ link })}
+          />
           <ColorField
             label={t.colorCodeBg}
             value={settings.colors.codeBg}
@@ -381,6 +406,51 @@ export function SettingsPanel() {
             <Switch
               checked={settings.showToc}
               onCheckedChange={(checked) => settings.set({ showToc: checked })}
+            />
+          </div>
+        </section>
+
+        <Separator />
+
+        <section className="grid gap-4">
+          <h3 className="text-sm font-medium">{t.faceTilt}</h3>
+          <div className="flex items-center justify-between gap-3">
+            <div className="grid gap-1 pr-3">
+              <Label>{t.faceTilt}</Label>
+              <p className="text-xs text-muted-foreground">{t.faceTiltHint}</p>
+              <p className="text-xs text-muted-foreground">{t.faceTiltPrivacy}</p>
+              {settings.faceTilt && tiltStatusText ? (
+                <p className="text-xs text-foreground" aria-live="polite">
+                  {tiltStatusText}
+                </p>
+              ) : null}
+            </div>
+            <Switch
+              checked={settings.faceTilt}
+              onCheckedChange={(checked) =>
+                settings.set(
+                  checked ? { faceTilt: true, viewMode: "preview" } : { faceTilt: false },
+                )
+              }
+            />
+          </div>
+          <Field label={t.faceTiltMode}>
+            <NativeSelect
+              value={settings.faceTiltMode}
+              onChange={(value) => settings.set({ faceTiltMode: value as FaceTiltMode })}
+            >
+              <option value="snap">{t.faceTiltSnap}</option>
+              <option value="free">{t.faceTiltFree}</option>
+            </NativeSelect>
+          </Field>
+          <div className="flex items-center justify-between gap-3">
+            <div className="grid gap-1 pr-3">
+              <Label>{t.faceTiltInvert}</Label>
+              <p className="text-xs text-muted-foreground">{t.faceTiltInvertHint}</p>
+            </div>
+            <Switch
+              checked={settings.faceTiltInvert}
+              onCheckedChange={(checked) => settings.set({ faceTiltInvert: checked })}
             />
           </div>
         </section>

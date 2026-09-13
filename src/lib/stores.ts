@@ -1,5 +1,6 @@
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
+import type { FaceTiltMode } from "@/lib/face-tilt";
 import { FONT_BY_ID } from "@/lib/fonts";
 import { isAppLang, type AppLang } from "@/lib/i18n";
 import { SAMPLE_DOCUMENT } from "@/lib/sample-document";
@@ -30,6 +31,9 @@ export type SettingsState = {
   softBreaks: boolean;
   syncScroll: boolean;
   showToc: boolean;
+  faceTilt: boolean;
+  faceTiltMode: FaceTiltMode;
+  faceTiltInvert: boolean;
   viewMode: ViewMode;
   contentLang: ContentLang;
   uiLang: AppLang;
@@ -59,6 +63,9 @@ const defaultSettings = {
   softBreaks: false,
   syncScroll: true,
   showToc: false,
+  faceTilt: false,
+  faceTiltMode: "snap" as FaceTiltMode,
+  faceTiltInvert: false,
   viewMode: "split" as ViewMode,
   contentLang: "ko" as ContentLang,
   uiLang: "ko" as AppLang,
@@ -88,9 +95,18 @@ export const useSettings = create<SettingsState>()(
     {
       name: "hanji-settings",
       skipHydration: true,
-      version: 3,
+      version: 4,
+      // The camera needs a fresh user gesture each visit, so the toggle itself is never persisted.
+      partialize: (state) => {
+        const { faceTilt: _faceTilt, ...rest } = state;
+        return rest as SettingsState;
+      },
       migrate: (persisted) => {
         const state = { ...(persisted as Record<string, unknown>) };
+        state.faceTilt = false;
+        if (state.faceTiltMode !== "snap" && state.faceTiltMode !== "free")
+          state.faceTiltMode = "snap";
+        if (typeof state.faceTiltInvert !== "boolean") state.faceTiltInvert = false;
         if (!isAppLang(state.uiLang)) state.uiLang = "ko";
         if (typeof state.fontWeight !== "number") state.fontWeight = 400;
         if (typeof state.headingWeight !== "number") state.headingWeight = 600;
