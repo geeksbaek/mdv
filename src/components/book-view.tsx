@@ -211,9 +211,14 @@ export function BookView() {
     [finish],
   );
 
+  // Dragging: mouse/pen grab an outer edge; a touch swipe works anywhere.
+  const drag = useRef<{ id: number; dir: 1 | -1 | 0; startX: number; moved: boolean } | null>(null);
+
   const turn = useCallback(
     (dir: 1 | -1) => {
-      if (flipRef.current) return;
+      // A drag owns the leaf until it is released: starting a keyboard or wheel
+      // turn underneath it would run two turns on one spread and desync pages.
+      if (flipRef.current || drag.current) return;
       if (dir === 1 && !canForward) return;
       if (dir === -1 && !canBack) return;
       animateTo(dir, 0, 1);
@@ -249,9 +254,6 @@ export function BookView() {
     el.addEventListener("wheel", onWheel, { passive: false });
     return () => el.removeEventListener("wheel", onWheel);
   }, [turn]);
-
-  // Dragging: mouse/pen grab an outer edge; a touch swipe works anywhere.
-  const drag = useRef<{ id: number; dir: 1 | -1 | 0; startX: number; moved: boolean } | null>(null);
 
   const allowed = (dir: 1 | -1) => (dir === 1 ? canForward : canBack);
 

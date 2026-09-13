@@ -612,10 +612,15 @@
   filter: drop-shadow(0 18px 30px rgb(0 0 0 / 0.18));
 }
 
+/* Pages clip with clip-path as well as overflow: inside the 3D-rotated leaf,
+   WebKit drops descendants' overflow clips (a preserve-3d quirk), which let the
+   article's neighbouring columns spill across the page and repeat what the
+   other page shows. clip-path and contain: paint hold in that context. */
 .md-book-page {
   position: absolute;
   top: 0;
   overflow: hidden;
+  clip-path: inset(0);
   background: var(--md-bg);
   color: var(--md-fg);
 }
@@ -673,6 +678,8 @@
 .md-book-clip {
   position: absolute;
   overflow: hidden;
+  clip-path: inset(0);
+  contain: paint;
 }
 
 .md-book-content {
@@ -742,6 +749,7 @@
   position: absolute;
   inset: 0;
   overflow: hidden;
+  clip-path: inset(0);
 }
 
 /* The back face is mounted only once the leaf is past 90°, pre-rotated so its
