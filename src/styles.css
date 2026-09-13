@@ -701,6 +701,27 @@
   break-inside: avoid;
 }
 
+/* No scroll containers inside a page. WebKit (every iPad browser, Chrome
+   included) gives an overflow: auto/hidden box in a multicol flow its own
+   layer and, when that box sits on a column break, paints it into both
+   columns — the same code block or table on facing pages. A page cannot
+   scroll sideways anyway, so wrap code and let the rest clip at the page. */
+.md-book-content .md-code,
+.md-book-content pre,
+.md-book-content .md-table-wrap,
+.md-book-content .md-math-block,
+.md-book-content .md-mermaid {
+  overflow: visible;
+}
+
+.md-book-content pre {
+  white-space: pre-wrap;
+}
+
+.md-book-content pre code {
+  overflow-wrap: anywhere;
+}
+
 .md-book-content h1,
 .md-book-content h2,
 .md-book-content h3 {
