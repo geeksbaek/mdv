@@ -17,6 +17,8 @@ export type Messages = {
   book: string;
   bookPage: (page: number, total: number) => string;
   bookHint: string;
+  bookEdgeRead: (n: number) => string;
+  bookEdgeRemaining: (n: number) => string;
   open: string;
   save: string;
   sample: string;
@@ -157,6 +159,8 @@ const ko: Messages = {
   book: "책",
   bookPage: (p, t) => `${p} / ${t}쪽`,
   bookHint: "모서리를 끌거나 클릭해 넘기세요. 터치 화면에서는 쓸어넘기고, 방향키와 휠도 됩니다.",
+  bookEdgeRead: (n) => `읽은 ${n}쪽`,
+  bookEdgeRemaining: (n) => `남은 ${n}쪽`,
   open: "열기",
   save: "저장",
   sample: "샘플",
@@ -307,6 +311,8 @@ const ja: Messages = {
   bookPage: (p, t) => `${p} / ${t}ページ`,
   bookHint:
     "角をドラッグまたはクリックしてめくります。タッチ画面ではスワイプ、矢印キーとホイールも使えます。",
+  bookEdgeRead: (n) => `読了 ${n}ページ`,
+  bookEdgeRemaining: (n) => `残り ${n}ページ`,
   open: "開く",
   save: "保存",
   sample: "サンプル",
@@ -456,6 +462,8 @@ const zhCN: Messages = {
   book: "书",
   bookPage: (p, t) => `第 ${p} / ${t} 页`,
   bookHint: "拖动或点击页角翻页；触屏可滑动，也可使用方向键和滚轮。",
+  bookEdgeRead: (n) => `已读 ${n} 页`,
+  bookEdgeRemaining: (n) => `剩余 ${n} 页`,
   open: "打开",
   save: "保存",
   sample: "示例",
@@ -604,6 +612,8 @@ const zhTW: Messages = {
   book: "書",
   bookPage: (p, t) => `第 ${p} / ${t} 頁`,
   bookHint: "拖曳或點擊頁角翻頁；觸控螢幕可滑動，也可使用方向鍵與滾輪。",
+  bookEdgeRead: (n) => `已讀 ${n} 頁`,
+  bookEdgeRemaining: (n) => `剩餘 ${n} 頁`,
   open: "開啟",
   save: "儲存",
   sample: "範例",
@@ -753,6 +763,8 @@ const en: Messages = {
   bookPage: (p, t) => `Page ${p} of ${t}`,
   bookHint:
     "Drag or click a page corner to turn it. Swipe on touch screens; arrow keys and the wheel work too.",
+  bookEdgeRead: (n) => `${n} pages read`,
+  bookEdgeRemaining: (n) => `${n} pages left`,
   open: "Open",
   save: "Save",
   sample: "Sample",

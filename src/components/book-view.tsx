@@ -10,7 +10,7 @@ import {
   type PointerEvent as ReactPointerEvent,
 } from "react";
 import { articleStyle } from "@/lib/article-style";
-import { bookLayout, leafSpec, type Segment } from "@/lib/book-layout";
+import { bookLayout, edgeThickness, leafSpec, type Segment } from "@/lib/book-layout";
 import { useViewportSegments } from "@/lib/viewport-segments";
 import { isTyping } from "@/lib/utils";
 import { messages } from "@/lib/i18n";
@@ -310,6 +310,7 @@ export function BookView() {
   const shade = flip ? Math.sin(flip.progress * Math.PI) : 0;
   const leaf = flip ? leafSpec(layout, spread, flip.dir, flip.progress) : null;
   const rightX = pageWidth + spineGap;
+  const edges = edgeThickness(pageCount, left, pages, pageWidth);
 
   // Pages that stay put while the leaf turns.
   const baseLeft =
@@ -341,6 +342,19 @@ export function BookView() {
         onPointerUp={onPointerUp}
         onPointerCancel={onPointerUp}
       >
+        {/* Fore-edges: the pile of pages already read (left) and still to read (right). */}
+        <div
+          className="md-book-edge md-book-edge-left"
+          style={{ width: edges.read, left: -edges.read }}
+          title={t.bookEdgeRead(edges.readPages)}
+          aria-label={t.bookEdgeRead(edges.readPages)}
+        />
+        <div
+          className="md-book-edge md-book-edge-right"
+          style={{ width: edges.remaining, right: -edges.remaining }}
+          title={t.bookEdgeRemaining(edges.remainingPages)}
+          aria-label={t.bookEdgeRemaining(edges.remainingPages)}
+        />
         <Page
           {...pageProps}
           index={baseLeft}

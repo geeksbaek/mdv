@@ -64,3 +64,23 @@ describe("leafSpec", () => {
     assert.equal(leafSpec(one, 3, -1, 0.9).front, 2);
   });
 });
+
+describe("edgeThickness", () => {
+  it("grows the left pile and shrinks the right one as reading progresses", async () => {
+    const { edgeThickness } = await import("./book-layout.ts");
+    const start = edgeThickness(40, 0, 2, 500);
+    assert.equal(start.read, 0);
+    assert.equal(start.remainingPages, 38);
+    const mid = edgeThickness(40, 20, 2, 500);
+    assert.ok(mid.read > 0 && mid.read < start.remaining);
+    const end = edgeThickness(40, 38, 2, 500);
+    assert.equal(end.remaining, 0);
+    assert.equal(end.readPages, 38);
+  });
+
+  it("never exceeds the cap and keeps a visible sliver for one page", async () => {
+    const { edgeThickness } = await import("./book-layout.ts");
+    assert.ok(edgeThickness(1000, 1000, 1, 2000).read <= 28);
+    assert.equal(edgeThickness(500, 1, 2, 500).read, 3);
+  });
+});

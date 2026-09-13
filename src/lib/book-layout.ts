@@ -132,3 +132,18 @@ export function leafSpec(
     backSide: "left",
   };
 }
+
+/** Page-edge stacks: how thick the read and remaining piles look, in px. */
+export function edgeThickness(
+  pageCount: number,
+  firstVisible: number,
+  visiblePages: number,
+  pageWidth: number,
+): { read: number; remaining: number; readPages: number; remainingPages: number } {
+  const max = Math.max(10, Math.min(28, Math.round(pageWidth * 0.06)));
+  const readPages = Math.max(0, Math.min(pageCount, firstVisible));
+  const remainingPages = Math.max(0, pageCount - firstVisible - visiblePages);
+  const scale = (n: number) =>
+    n <= 0 ? 0 : Math.max(3, Math.round((max * n) / Math.max(1, pageCount)));
+  return { read: scale(readPages), remaining: scale(remainingPages), readPages, remainingPages };
+}
