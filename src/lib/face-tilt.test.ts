@@ -42,25 +42,27 @@ describe("snapQuadrant", () => {
 });
 
 describe("easeFree", () => {
-  it("ignores sub-degree jitter", () => {
-    assert.equal(easeFree(0.6, 0), 0);
+  it("holds the current step inside the hysteresis band", () => {
+    assert.equal(easeFree(3.4, 0), 0);
+    assert.equal(easeFree(-3.4, 0), 0);
+    assert.equal(easeFree(8, 5), 5);
   });
 
-  it("moves in whole degrees toward the target", () => {
-    const next = easeFree(20, 0);
-    assert.ok(next > 0 && next < 20);
-    assert.equal(next, Math.round(next));
+  it("jumps to the nearest 5° step once past the band", () => {
+    assert.equal(easeFree(3.6, 0), 5);
+    assert.equal(easeFree(-3.6, 0), -5);
+    assert.equal(easeFree(37, 0), 35);
+    assert.equal(easeFree(178, 175), 175);
+    assert.equal(easeFree(-178, 175), 180);
   });
 
-  it("always advances at least one degree when off target", () => {
-    assert.equal(easeFree(1.4, 0), 1);
-    assert.equal(easeFree(-1.4, 0), -1);
-  });
-
-  it("converges exactly on the target", () => {
+  it("only ever returns multiples of five", () => {
     let a = 0;
-    for (let i = 0; i < 30; i++) a = easeFree(37, a);
-    assert.equal(a, 37);
+    for (let t = 0; t <= 90; t += 0.7) {
+      a = easeFree(t, a);
+      assert.equal(a % 5, 0);
+    }
+    assert.equal(a, 90);
   });
 });
 
