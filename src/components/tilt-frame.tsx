@@ -1,0 +1,47 @@
+import { useEffect, useRef, useState, type CSSProperties, type ReactNode } from "react";
+import { fitRotatedBox } from "@/lib/face-tilt";
+
+type Props = {
+  angle: number;
+  active: boolean;
+  children: ReactNode;
+};
+
+/**
+ * Rotates the reading surface to follow the viewer's face. The inner box is
+ * resized so it always fits the viewport after rotation, keeping text at its
+ * real size instead of scaling it.
+ */
+export function TiltFrame({ angle, active, children }: Props) {
+  const ref = useRef<HTMLDivElement>(null);
+  const [size, setSize] = useState({ width: 0, height: 0 });
+
+  useEffect(() => {
+    const el = ref.current;
+    if (!el || !active) return;
+    const update = () => setSize({ width: el.clientWidth, height: el.clientHeight });
+    update();
+    const observer = new ResizeObserver(update);
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, [active]);
+
+  if (!active) {
+    return <div className="h-full min-w-0">{children}</div>;
+  }
+
+  const box = size.width > 0 ? fitRotatedBox(size.width, size.height, angle) : size;
+  const style: CSSProperties = {
+    width: box.width,
+    height: box.height,
+    transform: `translate(-50%, -50%) rotate(${angle}deg)`,
+  };
+
+  return (
+    <div ref={ref} className="md-tilt-viewport">
+      <div className="md-tilt-box" style={style}>
+        {children}
+      </div>
+    </div>
+  );
+}

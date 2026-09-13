@@ -278,6 +278,42 @@ var RotateCcw = createLucideIcon("rotate-ccw", [["path", {
 * This source code is licensed under the ISC license.
 * See the LICENSE file in the root directory of this source tree.
 */
+var ScanFace = createLucideIcon("scan-face", [
+	["path", {
+		d: "M3 7V5a2 2 0 0 1 2-2h2",
+		key: "aa7l1z"
+	}],
+	["path", {
+		d: "M17 3h2a2 2 0 0 1 2 2v2",
+		key: "4qcy5o"
+	}],
+	["path", {
+		d: "M21 17v2a2 2 0 0 1-2 2h-2",
+		key: "6vwrx8"
+	}],
+	["path", {
+		d: "M7 21H5a2 2 0 0 1-2-2v-2",
+		key: "ioqczr"
+	}],
+	["path", {
+		d: "M8 14s1.5 2 4 2 4-2 4-2",
+		key: "1y1vjs"
+	}],
+	["path", {
+		d: "M9 9h.01",
+		key: "1q5me6"
+	}],
+	["path", {
+		d: "M15 9h.01",
+		key: "x1ddxp"
+	}]
+]);
+/**
+* @license lucide-react v0.510.0 - ISC
+*
+* This source code is licensed under the ISC license.
+* See the LICENSE file in the root directory of this source tree.
+*/
 var Settings2 = createLucideIcon("settings-2", [
 	["path", {
 		d: "M20 7h-9",
@@ -374,4 +410,4 @@ var X = createLucideIcon("x", [["path", {
 	key: "d8bk6v"
 }]]);
 //#endregion
-export { RotateCcw as a, Link2 as c, Ellipsis as d, Download as f, Check as h, Settings2 as i, FolderOpen as l, Columns2 as m, TriangleAlert as n, Printer as o, Copy as p, Share2 as r, PanelLeft as s, X as t, Eye as u };
+export { ScanFace as a, PanelLeft as c, Eye as d, Ellipsis as f, Check as g, Columns2 as h, Settings2 as i, Link2 as l, Copy as m, TriangleAlert as n, RotateCcw as o, Download as p, Share2 as r, Printer as s, X as t, FolderOpen as u };

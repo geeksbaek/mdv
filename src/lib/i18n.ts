@@ -81,6 +81,20 @@ export type Messages = {
   syncScrollHint: string;
   toc: string;
   tocHint: string;
+  faceTilt: string;
+  faceTiltHint: string;
+  faceTiltPrivacy: string;
+  faceTiltMode: string;
+  faceTiltSnap: string;
+  faceTiltFree: string;
+  faceTiltInvert: string;
+  faceTiltInvertHint: string;
+  faceTiltLoading: string;
+  faceTiltTracking: string;
+  faceTiltLost: string;
+  faceTiltDenied: string;
+  faceTiltUnsupported: string;
+  faceTiltError: string;
   resetDefaults: string;
   themes: Record<string, ThemeCopy>;
   shareTitle: string;
@@ -181,6 +195,20 @@ const ko: Messages = {
   syncScrollHint: "편집기와 미리보기를 같은 비율로 움직입니다.",
   toc: "목차",
   tocHint: "제목으로 미리보기 위치를 점프합니다.",
+  faceTilt: "얼굴 따라 회전",
+  faceTiltHint: "전면 카메라로 얼굴 기울기를 읽어 글을 눈높이에 맞춥니다. 누워서 읽을 때 유용합니다.",
+  faceTiltPrivacy: "영상은 기기 안에서만 처리되며 어디에도 전송되지 않습니다.",
+  faceTiltMode: "회전 방식",
+  faceTiltSnap: "90도 단위",
+  faceTiltFree: "자유 회전",
+  faceTiltInvert: "방향 반전",
+  faceTiltInvertHint: "글이 반대로 돌면 켜세요.",
+  faceTiltLoading: "카메라를 준비하는 중…",
+  faceTiltTracking: "얼굴을 따라가는 중",
+  faceTiltLost: "얼굴을 찾는 중…",
+  faceTiltDenied: "카메라 권한이 거부되었습니다.",
+  faceTiltUnsupported: "이 기기에서는 카메라를 쓸 수 없습니다.",
+  faceTiltError: "얼굴 인식을 시작하지 못했습니다.",
   resetDefaults: "글꼴·용지 기본값",
   themes: {
     hanji: { name: "한지", description: "따뜻한 닥종이" },
@@ -288,6 +316,20 @@ const ja: Messages = {
   syncScrollHint: "編集とプレビューを同じ割合で動かします。",
   toc: "目次",
   tocHint: "見出しからプレビュー位置へジャンプします。",
+  faceTilt: "顔に合わせて回転",
+  faceTiltHint: "前面カメラで顔の傾きを読み取り、文章を目線に合わせます。寝転んで読むときに便利です。",
+  faceTiltPrivacy: "映像は端末内でのみ処理され、どこにも送信されません。",
+  faceTiltMode: "回転方式",
+  faceTiltSnap: "90度単位",
+  faceTiltFree: "自由回転",
+  faceTiltInvert: "方向を反転",
+  faceTiltInvertHint: "逆方向に回る場合はオンにしてください。",
+  faceTiltLoading: "カメラを準備中…",
+  faceTiltTracking: "顔を追跡中",
+  faceTiltLost: "顔を探しています…",
+  faceTiltDenied: "カメラの許可が拒否されました。",
+  faceTiltUnsupported: "この端末ではカメラを使用できません。",
+  faceTiltError: "顔認識を開始できませんでした。",
   resetDefaults: "フォント・用紙を初期化",
   themes: {
     hanji: { name: "韓紙", description: "あたたかい和紙" },
@@ -395,6 +437,20 @@ const zhCN: Messages = {
   syncScrollHint: "编辑区和预览按相同比例滚动。",
   toc: "目录",
   tocHint: "通过标题跳到预览位置。",
+  faceTilt: "跟随面部旋转",
+  faceTiltHint: "通过前置摄像头读取面部倾斜，让文字与视线对齐。躺着阅读时很有用。",
+  faceTiltPrivacy: "画面仅在设备内处理，不会发送到任何地方。",
+  faceTiltMode: "旋转方式",
+  faceTiltSnap: "按 90 度",
+  faceTiltFree: "自由旋转",
+  faceTiltInvert: "反转方向",
+  faceTiltInvertHint: "如果文字转向相反，请打开。",
+  faceTiltLoading: "正在准备摄像头…",
+  faceTiltTracking: "正在跟随面部",
+  faceTiltLost: "正在寻找面部…",
+  faceTiltDenied: "摄像头权限被拒绝。",
+  faceTiltUnsupported: "此设备无法使用摄像头。",
+  faceTiltError: "无法启动面部识别。",
   resetDefaults: "恢复字体与纸张默认值",
   themes: {
     hanji: { name: "韩纸", description: "温润的皮纸" },
@@ -502,6 +558,20 @@ const zhTW: Messages = {
   syncScrollHint: "編輯區與預覽依相同比例捲動。",
   toc: "目錄",
   tocHint: "透過標題跳到預覽位置。",
+  faceTilt: "跟隨臉部旋轉",
+  faceTiltHint: "透過前鏡頭讀取臉部傾斜，讓文字與視線對齊。躺著閱讀時很實用。",
+  faceTiltPrivacy: "影像僅在裝置內處理，不會傳送到任何地方。",
+  faceTiltMode: "旋轉方式",
+  faceTiltSnap: "以 90 度為單位",
+  faceTiltFree: "自由旋轉",
+  faceTiltInvert: "反轉方向",
+  faceTiltInvertHint: "若文字轉向相反，請開啟。",
+  faceTiltLoading: "正在準備相機…",
+  faceTiltTracking: "正在跟隨臉部",
+  faceTiltLost: "正在尋找臉部…",
+  faceTiltDenied: "相機權限遭拒。",
+  faceTiltUnsupported: "此裝置無法使用相機。",
+  faceTiltError: "無法啟動臉部辨識。",
   resetDefaults: "還原字型與用紙預設值",
   themes: {
     hanji: { name: "韓紙", description: "溫潤的皮紙" },
@@ -609,6 +679,20 @@ const en: Messages = {
   syncScrollHint: "Move the editor and preview by the same ratio.",
   toc: "Contents",
   tocHint: "Jump the preview to a heading.",
+  faceTilt: "Follow your face",
+  faceTiltHint: "Reads your head tilt with the front camera and keeps the text level with your eyes. Handy when reading lying down.",
+  faceTiltPrivacy: "Video is processed on this device only and never leaves it.",
+  faceTiltMode: "Rotation",
+  faceTiltSnap: "90° steps",
+  faceTiltFree: "Free rotation",
+  faceTiltInvert: "Flip direction",
+  faceTiltInvertHint: "Turn on if the text rotates the wrong way.",
+  faceTiltLoading: "Starting the camera…",
+  faceTiltTracking: "Following your face",
+  faceTiltLost: "Looking for a face…",
+  faceTiltDenied: "Camera permission was denied.",
+  faceTiltUnsupported: "The camera is not available on this device.",
+  faceTiltError: "Face tracking could not start.",
   resetDefaults: "Reset fonts and paper",
   themes: {
     hanji: { name: "Hanji", description: "Warm mulberry paper" },
