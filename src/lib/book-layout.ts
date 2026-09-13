@@ -133,17 +133,55 @@ export function leafSpec(
   };
 }
 
-/** Page-edge stacks: how thick the read and remaining piles look, in px. */
+/** Preferred stripe pitch: one stripe per page, 3px when there is room. */
+const EDGE_PITCH = 3;
+/** Thinnest pitch that still reads as separate sheets (1px light + 1px dark). */
+const EDGE_MIN_PITCH = 2;
+
+export type EdgeSpec = {
+  /** Pile widths in px — exactly `pitch × pages` for each side. */
+  read: number;
+  remaining: number;
+  readPages: number;
+  remainingPages: number;
+  /** Width of one stripe (one page), in px. */
+  pitch: number;
+  /**
+   * False when the document has more pages than the cap can show at the
+   * minimum pitch; the piles are then proportional rather than one-per-page.
+   */
+  exact: boolean;
+};
+
+/**
+ * Page-edge stacks: one stripe per page, so the pile beside the spread can be
+ * counted. The pitch is shared by both piles (a sheet is a sheet) and chosen so
+ * the whole book fits under the cap: 3px, else 2px, else a fractional pitch
+ * that keeps the sums right even when single sheets stop being countable.
+ */
 export function edgeThickness(
   pageCount: number,
   firstVisible: number,
   visiblePages: number,
   pageWidth: number,
-): { read: number; remaining: number; readPages: number; remainingPages: number } {
-  const max = Math.max(10, Math.min(28, Math.round(pageWidth * 0.06)));
+): EdgeSpec {
+  const max = Math.max(24, Math.min(120, Math.round(pageWidth * 0.12)));
   const readPages = Math.max(0, Math.min(pageCount, firstVisible));
   const remainingPages = Math.max(0, pageCount - firstVisible - visiblePages);
-  const scale = (n: number) =>
-    n <= 0 ? 0 : Math.max(3, Math.round((max * n) / Math.max(1, pageCount)));
-  return { read: scale(readPages), remaining: scale(remainingPages), readPages, remainingPages };
+  // Both piles are at most `pageCount` pages, so the book as a whole is the
+  // sizing constraint — and neither pile ever needs a different pitch.
+  const total = Math.max(1, pageCount);
+  let pitch = EDGE_PITCH;
+  if (total * pitch > max) pitch = EDGE_MIN_PITCH;
+  const exact = total * pitch <= max;
+  if (!exact) pitch = max / total;
+  const width = (n: number) => (n <= 0 ? 0 : Math.max(1, Math.round(n * pitch * 100) / 100));
+  return {
+    read: width(readPages),
+    remaining: width(remainingPages),
+    readPages,
+    remainingPages,
+    pitch,
+    exact,
+  };
 }

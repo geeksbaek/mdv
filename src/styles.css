@@ -94,8 +94,9 @@
   --radius-md: calc(var(--radius) - 2px);
   --radius-lg: var(--radius);
   --radius-xl: calc(var(--radius) + 4px);
-  --font-sans: "Pretendard Variable", Pretendard, "Apple SD Gothic Neo", "Malgun Gothic",
-    "Hiragino Sans", sans-serif;
+  --font-sans:
+    "Pretendard Variable", Pretendard, "Apple SD Gothic Neo", "Malgun Gothic", "Hiragino Sans",
+    sans-serif;
 }
 
 @layer base {
@@ -633,18 +634,20 @@
   border-radius: 6px;
 }
 
-/* Stacked sheet edges beside the spread; each 3px stripe is one "sheet". */
+/* Stacked sheet edges beside the spread; one stripe (`--md-edge-pitch` wide) per page. */
 .md-book-edge {
+  --md-edge-pitch: 3px;
   position: absolute;
   top: 3px;
   bottom: 3px;
-  background:
-    repeating-linear-gradient(
-      to right,
-      color-mix(in oklab, var(--md-bg) 72%, black) 0 1px,
-      color-mix(in oklab, var(--md-bg) 90%, white) 1px 2px,
-      color-mix(in oklab, var(--md-bg) 94%, black) 2px 3px
-    );
+  background: repeating-linear-gradient(
+    to right,
+    color-mix(in oklab, var(--md-bg) 72%, black) 0 calc(var(--md-edge-pitch) * 0.34),
+    color-mix(in oklab, var(--md-bg) 90%, white) calc(var(--md-edge-pitch) * 0.34)
+      calc(var(--md-edge-pitch) * 0.67),
+    color-mix(in oklab, var(--md-bg) 94%, black) calc(var(--md-edge-pitch) * 0.67)
+      var(--md-edge-pitch)
+  );
   transition:
     width 0.4s ease,
     left 0.4s ease,

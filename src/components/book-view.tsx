@@ -349,13 +349,25 @@ export function BookView() {
         {/* Fore-edges: the pile of pages already read (left) and still to read (right). */}
         <div
           className="md-book-edge md-book-edge-left"
-          style={{ width: edges.read, left: -edges.read }}
+          style={
+            {
+              width: edges.read,
+              left: -edges.read,
+              "--md-edge-pitch": `${edges.pitch}px`,
+            } as CSSProperties
+          }
           title={t.bookEdgeRead(edges.readPages)}
           aria-label={t.bookEdgeRead(edges.readPages)}
         />
         <div
           className="md-book-edge md-book-edge-right"
-          style={{ width: edges.remaining, right: -edges.remaining }}
+          style={
+            {
+              width: edges.remaining,
+              right: -edges.remaining,
+              "--md-edge-pitch": `${edges.pitch}px`,
+            } as CSSProperties
+          }
           title={t.bookEdgeRemaining(edges.remainingPages)}
           aria-label={t.bookEdgeRemaining(edges.remainingPages)}
         />

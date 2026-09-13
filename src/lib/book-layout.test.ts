@@ -78,9 +78,28 @@ describe("edgeThickness", () => {
     assert.equal(end.readPages, 38);
   });
 
-  it("never exceeds the cap and keeps a visible sliver for one page", async () => {
+  it("draws exactly one stripe per page while the book fits under the cap", async () => {
     const { edgeThickness } = await import("./book-layout.ts");
-    assert.ok(edgeThickness(1000, 1000, 1, 2000).read <= 28);
-    assert.equal(edgeThickness(500, 1, 2, 500).read, 3);
+    const e = edgeThickness(30, 10, 2, 800);
+    assert.equal(e.exact, true);
+    assert.equal(e.pitch, 3);
+    assert.equal(e.read, 10 * 3);
+    assert.equal(e.remaining, 18 * 3);
+    assert.equal(edgeThickness(500, 1, 2, 500).read >= 1, true);
+  });
+
+  it("shares one pitch across both piles and narrows it before going proportional", async () => {
+    const { edgeThickness } = await import("./book-layout.ts");
+    // 800px page → 96px cap: 40 pages need 120px at 3px, so drop to 2px.
+    const narrow = edgeThickness(40, 20, 2, 800);
+    assert.equal(narrow.exact, true);
+    assert.equal(narrow.pitch, 2);
+    assert.equal(narrow.read, 40);
+    assert.equal(narrow.remaining, 36);
+    // 1000 pages can't fit; widths stay capped and proportional.
+    const huge = edgeThickness(1000, 1000, 1, 2000);
+    assert.equal(huge.exact, false);
+    assert.ok(huge.read <= 120);
+    assert.ok(huge.pitch < 2);
   });
 });
