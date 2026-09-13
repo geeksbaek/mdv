@@ -115,7 +115,9 @@ export function shortShareUrl(origin: string, code: string): string {
   return `${origin}/s/${code}`;
 }
 
-export function readEncodedFromLocation(location: Pick<Location, "search" | "hash">): string | undefined {
+export function readEncodedFromLocation(
+  location: Pick<Location, "search" | "hash">,
+): string | undefined {
   const query = new URLSearchParams(location.search).get("d");
   if (query) return query;
   const hash = location.hash;
@@ -143,7 +145,7 @@ function parseEnvelope(raw: unknown): ShareDocument | null {
   if (o.markdown.length > MAX_SHARE_MARKDOWN) return null;
   return {
     markdown: o.markdown,
-    fileName: sanitizeFileName(typeof o.fileName === "string" ? o.fileName : "한지.md"),
+    fileName: sanitizeFileName(typeof o.fileName === "string" ? o.fileName : ""),
     settings: parseSettings(o.settings),
   };
 }
@@ -196,8 +198,8 @@ function knownFont(value: unknown, fallback: string): string {
 }
 
 function sanitizeFileName(name: string): string {
-  const cleaned = name.replace(/[/\\]/g, "").trim().slice(0, 80);
-  return cleaned || "한지.md";
+  // Empty means "follow the document title" (see `useFileName`).
+  return name.replace(/[/\\]/g, "").trim().slice(0, 80);
 }
 
 function clamp(value: unknown, min: number, max: number, fallback: number): number {

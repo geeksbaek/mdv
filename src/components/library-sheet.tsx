@@ -24,7 +24,7 @@ import {
   saveDocument,
   type SavedDocumentSummary,
 } from "@/lib/library";
-import { useDocument, useSettings } from "@/lib/stores";
+import { useDocument, useFileName, useSettings } from "@/lib/stores";
 import { cn } from "@/lib/utils";
 
 type Props = {
@@ -36,7 +36,7 @@ export function LibrarySheet({ open, onOpenChange }: Props) {
   const uiLang = useSettings((s) => s.uiLang);
   const t = messages(uiLang);
   const markdown = useDocument((s) => s.markdown);
-  const fileName = useDocument((s) => s.fileName);
+  const fileName = useFileName();
   const libraryId = useDocument((s) => s.libraryId);
   const dirty = useDocument((s) => s.dirty);
   const [name, setName] = useState(fileName);

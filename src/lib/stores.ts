@@ -2,7 +2,8 @@ import { create } from "zustand";
 import { persist } from "zustand/middleware";
 import type { FaceTiltMode } from "@/lib/face-tilt";
 import { FONT_BY_ID } from "@/lib/fonts";
-import { isAppLang, type AppLang } from "@/lib/i18n";
+import { isAppLang, messages, type AppLang } from "@/lib/i18n";
+import { defaultFileName } from "@/lib/markdown";
 import { SAMPLE_DOCUMENT } from "@/lib/sample-document";
 import { DEFAULT_THEME, THEME_BY_ID, type ThemeColors } from "@/lib/themes";
 
@@ -129,6 +130,7 @@ export const useSettings = create<SettingsState>()(
 
 export type DocumentState = {
   markdown: string;
+  /** The document's own name; empty when it should follow the title (see `useFileName`). */
   fileName: string;
   /** Id in the browser library when this document was saved there or opened from it. */
   libraryId: string | null;
@@ -146,13 +148,13 @@ export const useDocument = create<DocumentState>()(
   persist(
     (set) => ({
       markdown: SAMPLE_DOCUMENT,
-      fileName: "한지.md",
+      fileName: "",
       libraryId: null,
       dirty: false,
       setMarkdown: (markdown) => set({ markdown, dirty: true }),
       setFileName: (fileName) => set({ fileName }),
       loadSample: () =>
-        set({ markdown: SAMPLE_DOCUMENT, fileName: "한지.md", libraryId: null, dirty: false }),
+        set({ markdown: SAMPLE_DOCUMENT, fileName: "", libraryId: null, dirty: false }),
       replace: ({ markdown, fileName, libraryId = null }) =>
         set({ markdown, fileName, libraryId, dirty: false }),
       markSaved: (libraryId, fileName) => set({ libraryId, fileName, dirty: false }),
@@ -160,16 +162,35 @@ export const useDocument = create<DocumentState>()(
     {
       name: "hanji-document",
       skipHydration: true,
-      version: 2,
-      migrate: (persisted) => {
+      version: 3,
+      migrate: (persisted, version) => {
         const state = { ...(persisted as Record<string, unknown>) };
         if (typeof state.libraryId !== "string") state.libraryId = null;
         if (typeof state.dirty !== "boolean") state.dirty = false;
+        // v2 named every fresh document after the app; let those follow their title.
+        if (version < 3 && (state.fileName === "한지.md" || typeof state.fileName !== "string")) {
+          state.fileName = "";
+        }
         return state as DocumentState;
       },
     },
   ),
 );
+
+/** The document's effective name: its own, else derived from its title. */
+export function effectiveFileName(
+  doc: Pick<DocumentState, "markdown" | "fileName">,
+  uiLang: AppLang,
+): string {
+  return doc.fileName || defaultFileName(doc.markdown, messages(uiLang).untitledDocument);
+}
+
+export function useFileName(): string {
+  const fileName = useDocument((s) => s.fileName);
+  const markdown = useDocument((s) => s.markdown);
+  const uiLang = useSettings((s) => s.uiLang);
+  return fileName || defaultFileName(markdown, messages(uiLang).untitledDocument);
+}
 
 export function headingFontId(settings: Pick<SettingsState, "headingFont" | "bodyFont">): string {
   return settings.headingFont === "match-body" ? settings.bodyFont : settings.headingFont;

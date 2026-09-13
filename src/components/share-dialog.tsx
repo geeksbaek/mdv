@@ -3,13 +3,8 @@ import { Check, Copy, Link2 } from "lucide-react";
 import { toast } from "sonner";
 import { createShare } from "@/lib/share-api";
 import { messages } from "@/lib/i18n";
-import {
-  encodeSharePayload,
-  longShareUrl,
-  shortShareUrl,
-  snapshotSettings,
-} from "@/lib/share";
-import { useDocument, useSettings } from "@/lib/stores";
+import { encodeSharePayload, longShareUrl, shortShareUrl, snapshotSettings } from "@/lib/share";
+import { effectiveFileName, useDocument, useSettings } from "@/lib/stores";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -33,7 +28,9 @@ type ShareDialogProps = {
 export function ShareDialog({ open, onOpenChange }: ShareDialogProps) {
   const t = messages(useSettings((s) => s.uiLang));
   const [includeSettings, setIncludeSettings] = useState(true);
-  const [status, setStatus] = useState<"idle" | "creating" | "ready" | "fallback" | "error">("idle");
+  const [status, setStatus] = useState<"idle" | "creating" | "ready" | "fallback" | "error">(
+    "idle",
+  );
   const [shortUrl, setShortUrl] = useState("");
   const [longUrl, setLongUrl] = useState("");
   const [copied, setCopied] = useState<"short" | "long" | null>(null);
@@ -55,7 +52,7 @@ export function ShareDialog({ open, onOpenChange }: ShareDialogProps) {
         const settings = useSettings.getState();
         const payload = await encodeSharePayload({
           markdown: document.markdown,
-          fileName: document.fileName,
+          fileName: effectiveFileName(document, settings.uiLang),
           settings: includeSettings ? snapshotSettings(settings) : undefined,
         });
         const origin = window.location.origin;
@@ -98,7 +95,9 @@ export function ShareDialog({ open, onOpenChange }: ShareDialogProps) {
 
   const displayUrl = status === "fallback" ? longUrl : shortUrl;
   const showLong =
-    Boolean(longUrl) && longUrl.length <= LONG_URL_LIMIT && (status === "ready" || status === "fallback");
+    Boolean(longUrl) &&
+    longUrl.length <= LONG_URL_LIMIT &&
+    (status === "ready" || status === "fallback");
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -183,8 +182,20 @@ function UrlField({
     <div className="grid gap-2">
       <Label className="text-muted-foreground">{label}</Label>
       <div className="flex gap-2">
-        <Input readOnly value={value} className="font-mono text-xs" onFocus={(event) => event.currentTarget.select()} />
-        <Button type="button" variant="outline" size="icon" className="shrink-0" onClick={onCopy} aria-label={copyLabel}>
+        <Input
+          readOnly
+          value={value}
+          className="font-mono text-xs"
+          onFocus={(event) => event.currentTarget.select()}
+        />
+        <Button
+          type="button"
+          variant="outline"
+          size="icon"
+          className="shrink-0"
+          onClick={onCopy}
+          aria-label={copyLabel}
+        >
           {copied ? <Check className={cn("size-4")} /> : <Copy />}
         </Button>
       </div>

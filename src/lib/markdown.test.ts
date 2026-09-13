@@ -25,7 +25,8 @@ const CASES: Array<{ name: string; source: string; tag: "strong" | "em" | "s" }>
   },
   {
     name: "Japanese ideographic period",
-    source: "**このアスタリスクは強調記号として認識されず、そのまま表示されます。**この文のせいで。",
+    source:
+      "**このアスタリスクは強調記号として認識されず、そのまま表示されます。**この文のせいで。",
     tag: "strong",
   },
   {
@@ -84,4 +85,17 @@ test("page title prefers the first h1 then any heading", () => {
   const empty = renderMarkdown("제목 없이 본문만.", { cjkFriendly: true, softBreaks: false });
   assert.equal(primaryHeading(empty.headings), undefined);
   assert.equal(pageTitle(empty.headings, "제목 없는 문서"), "제목 없는 문서");
+});
+
+test("sourceTitle and defaultFileName follow the first H1, skipping markup and fences", async () => {
+  const { sourceTitle, defaultFileName } = await import("./markdown.ts");
+  assert.equal(
+    sourceTitle("```\n# not a title\n```\n\n## 부제\n\n# **한지** 뷰어 #\n"),
+    "한지 뷰어",
+  );
+  assert.equal(sourceTitle("Setext 제목\n=====\n\n# 나중 H1"), "Setext 제목");
+  assert.equal(sourceTitle("## 부제만\n\n본문"), "부제만");
+  assert.equal(sourceTitle("본문뿐"), undefined);
+  assert.equal(defaultFileName('# 회의록: 9/13 "초안"\n', "제목 없는 문서"), "회의록 9 13 초안.md");
+  assert.equal(defaultFileName("본문뿐", "제목 없는 문서"), "제목 없는 문서.md");
 });

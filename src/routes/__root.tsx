@@ -5,7 +5,7 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { Toaster } from "sonner";
 import appCss from "../styles.css?url";
 
-const APP_TITLE = "CJK 마크다운";
+const APP_TITLE = "mdv";
 
 export const Route = createRootRoute({
   head: () => ({

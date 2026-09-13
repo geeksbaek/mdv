@@ -17,7 +17,7 @@ import {
 import { toast } from "sonner";
 import { useFaceTiltRuntime } from "@/lib/face-tilt";
 import { messages } from "@/lib/i18n";
-import { useDocument, useSettings, type ViewMode } from "@/lib/stores";
+import { useDocument, useFileName, useSettings, type ViewMode } from "@/lib/stores";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -65,7 +65,7 @@ export function Toolbar({ mobile }: { mobile: boolean }) {
   const viewMode = useSettings((s) => s.viewMode);
   const setView = (next: ViewMode) => useSettings.getState().set({ viewMode: next });
   const cjkFriendly = useSettings((s) => s.cjkFriendly);
-  const fileName = useDocument((s) => s.fileName);
+  const fileName = useFileName();
   const markdown = useDocument((s) => s.markdown);
   const faceTilt = useSettings((s) => s.faceTilt);
   const tiltStatus = useFaceTiltRuntime((s) => s.status);
@@ -123,7 +123,7 @@ export function Toolbar({ mobile }: { mobile: boolean }) {
         }}
       />
       <div className="flex min-w-0 items-baseline gap-2 px-2">
-        <span className="text-base font-medium tracking-tight">한지</span>
+        <span className="text-base font-medium tracking-tight">mdv</span>
         <span className="hidden truncate text-xs text-muted-foreground sm:inline">{fileName}</span>
       </div>
 

@@ -484,6 +484,69 @@ export function primaryHeading(headings: Heading[]): string | undefined {
   return text || undefined;
 }
 
+/**
+ * The document's title read straight from the source: the first ATX or setext
+ * H1, falling back to the first heading of any level. Cheap enough to run on
+ * every keystroke, unlike a full render, so file names can follow the title.
+ */
+export function sourceTitle(markdown: string): string | undefined {
+  const lines = markdown.split(/\r?\n/);
+  let first: string | undefined;
+  let inFence = false;
+  for (let i = 0; i < lines.length; i++) {
+    const line = lines[i]!;
+    if (/^\s{0,3}(```|~~~)/.test(line)) {
+      inFence = !inFence;
+      continue;
+    }
+    if (inFence) continue;
+    const atx = /^\s{0,3}(#{1,6})\s+(.*?)\s*#*\s*$/.exec(line);
+    if (atx) {
+      const text = plainInline(atx[2]!);
+      if (!text) continue;
+      if (atx[1]!.length === 1) return text;
+      first ??= text;
+      continue;
+    }
+    const next = lines[i + 1];
+    if (next && /^\s{0,3}=+\s*$/.test(next) && line.trim()) {
+      const text = plainInline(line);
+      if (text) return text;
+    }
+    if (next && /^\s{0,3}-+\s*$/.test(next) && line.trim() && !/^\s{0,3}-/.test(line)) {
+      const text = plainInline(line);
+      if (text) first ??= text;
+    }
+  }
+  return first;
+}
+
+/** Heading text without its inline markup, for titles and file names. */
+function plainInline(text: string): string {
+  return text
+    .replace(/!\[([^\]]*)\]\([^)]*\)/g, "$1")
+    .replace(/\[([^\]]*)\]\([^)]*\)/g, "$1")
+    .replace(/[`*_~]+/g, "")
+    .replace(/<[^>]+>/g, "")
+    .replace(/\s+/g, " ")
+    .trim();
+}
+
+/**
+ * The name a document saves under when it has none of its own: its title
+ * (see `sourceTitle`) as a safe file name, else `fallback`, plus `.md`.
+ */
+export function defaultFileName(markdown: string, fallback: string): string {
+  const title = sourceTitle(markdown) ?? fallback;
+  const safe = title
+    .replace(/[/\\:*?"<>|]/g, " ")
+    .replace(/\s+/g, " ")
+    .trim()
+    .slice(0, 80)
+    .trim();
+  return `${safe || fallback}.md`;
+}
+
 export function pageTitle(headings: Heading[], fallback: string): string {
   return primaryHeading(headings) ?? fallback;
 }

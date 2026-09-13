@@ -307,10 +307,10 @@ const ko: Messages = {
   tocLabel: "목차",
   noHeadings: "제목이 없습니다.",
   untitledDocument: "제목 없는 문서",
-  appTitle: "CJK 마크다운",
+  appTitle: "mdv",
   linkMissing: "링크를 찾을 수 없습니다",
   linkMissingHint: "만료되었거나 잘못된 주소입니다. 새로 공유하면 다른 짧은 링크가 만들어집니다.",
-  backHome: "한지로 돌아가기",
+  backHome: "mdv로 돌아가기",
 };
 
 const ja: Messages = {
@@ -464,10 +464,10 @@ const ja: Messages = {
   tocLabel: "目次",
   noHeadings: "見出しがありません。",
   untitledDocument: "無題の文書",
-  appTitle: "CJK Markdown",
+  appTitle: "mdv",
   linkMissing: "リンクが見つかりません",
   linkMissingHint: "期限切れか、誤ったアドレスです。新しく共有すると別の短いリンクになります。",
-  backHome: "韓紙に戻る",
+  backHome: "mdvに戻る",
 };
 
 const zhCN: Messages = {
@@ -619,10 +619,10 @@ const zhCN: Messages = {
   tocLabel: "目录",
   noHeadings: "没有标题。",
   untitledDocument: "无标题文档",
-  appTitle: "CJK Markdown",
+  appTitle: "mdv",
   linkMissing: "找不到链接",
   linkMissingHint: "链接已过期或地址有误。重新分享会生成新的短链接。",
-  backHome: "返回韩纸",
+  backHome: "返回 mdv",
 };
 
 const zhTW: Messages = {
@@ -774,10 +774,10 @@ const zhTW: Messages = {
   tocLabel: "目錄",
   noHeadings: "沒有標題。",
   untitledDocument: "無標題文件",
-  appTitle: "CJK Markdown",
+  appTitle: "mdv",
   linkMissing: "找不到連結",
   linkMissingHint: "連結已過期或網址有誤。重新分享會產生新的短網址。",
-  backHome: "返回韓紙",
+  backHome: "返回 mdv",
 };
 
 const en: Messages = {
@@ -933,10 +933,10 @@ const en: Messages = {
   tocLabel: "Contents",
   noHeadings: "No headings.",
   untitledDocument: "Untitled document",
-  appTitle: "CJK Markdown",
+  appTitle: "mdv",
   linkMissing: "Link not found",
   linkMissingHint: "This address is expired or invalid. Sharing again creates a new short link.",
-  backHome: "Back to Hanji",
+  backHome: "Back to mdv",
 };
 
 export const MESSAGES: Record<AppLang, Messages> = {
